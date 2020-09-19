@@ -1,7 +1,7 @@
 module("L_VirtualBinaryLight1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualBinaryLight"
-local _PLUGIN_VERSION = "2.0.1"
+local _PLUGIN_VERSION = "2.0.2"
 
 local debugMode = false
 

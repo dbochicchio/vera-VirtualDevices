@@ -1,7 +1,7 @@
 module("L_VirtualRGBW1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualRGBW"
-local _PLUGIN_VERSION = "2.0.1"
+local _PLUGIN_VERSION = "2.0.2"
 
 local debugMode = false
 
@@ -310,14 +310,17 @@ function actionBrightness(newVal, devNum)
 			setVar(SWITCHSID, "Target", 1, devNum)
 			sendDeviceCommand(COMMANDS_SETPOWER, {"on"}, devNum, function()
 				setVar(SWITCHSID, "Status", 1, devNum)
-				setVar(DIMMERSID, "LoadLevelStatus", newVal, devNum)
 			end)
 		end
-		sendDeviceCommand(COMMANDS_SETBRIGHTNESS, {newVal}, devNum)
+		sendDeviceCommand(COMMANDS_SETBRIGHTNESS, {newVal}, devNum, function()
+			setVar(DIMMERSID, "LoadLevelStatus", newVal, devNum)
+		end)
 	elseif getVarNumeric(DIMMERSID, "AllowZeroLevel", 0, devNum) ~= 0 then
 		-- Level 0 allowed as on status, just go with it.
 		setVar(DIMMERSID, "LoadLevelStatus", newVal, devNum)
-		sendDeviceCommand(COMMANDS_SETBRIGHTNESS, {0}, devNum)
+		sendDeviceCommand(COMMANDS_SETBRIGHTNESS, {0}, devNum, function()
+			setVar(DIMMERSID, "LoadLevelStatus", newVal, devNum)
+		end)
 	else
 		setVar(SWITCHSID, "Target", 0, devNum)
 
@@ -352,6 +355,12 @@ local function approximateRGB(t)
 	return r, g, b
 end
 
+local function updateColor(devNum, w, c, r, g, b)
+	local targetColor = string.format("0=%d,1=%d,2=%d,3=%d,4=%d", w, c, r, g, b)
+	D(devNum, "updateColor(%1,%2)", device, targetColor)
+	setVar(COLORSID, "CurrentColor", targetColor, devNum)
+end
+
 function actionSetColor(newVal, devNum, sendToDevice)
 	D(devNum, "actionSetColor(%1,%2)", newVal, devNum)
 
@@ -364,7 +373,6 @@ function actionSetColor(newVal, devNum, sendToDevice)
 	end
 	local w, c, r, g, b
 
-	local success = false
 	local s = split(newVal)
 	if #s == 3 then
 		-- R,G,B -- handle both 255,0,255 OR R255,G0,B255 value
@@ -376,7 +384,7 @@ function actionSetColor(newVal, devNum, sendToDevice)
 		-- local rgb = r * 65536 + g * 256 + b
 		if r ~= nil and g  ~= nil and  b ~= nil and sendToDevice then
 			sendDeviceCommand(COMMANDS_SETRGBCOLOR, {r, g, b}, devNum, function()
-				success = true
+				updateColor(devNum, w, c, r, g, b)
 			end)
 		end
 
@@ -434,23 +442,19 @@ function actionSetColor(newVal, devNum, sendToDevice)
 			end
 		end
 
+		r, g, b = approximateRGB(temp)
 		if sendToDevice then
 			sendDeviceCommand(COMMANDS_SETWHITETEMPERATURE, {temp}, devNum, function()
-				success = true
+				updateColor(devNum, w, c, r, g, b)
 			end)
 		end
 		restoreBrightness(devNum)
 
-		r, g, b = approximateRGB(temp)
 		D(devNum, "aprox RGB(%1,%2,%3)", r, g, b)
 	end
 
 	local targetColor = string.format("0=%d,1=%d,2=%d,3=%d,4=%d", w, c, r, g, b)
 	setVar(COLORSID, "TargetColor", targetColor, devNum)
-
-	if success then
-		setVar(COLORSID, "CurrentColor", targetColor, devNum)
-	end
 end
 
 -- Toggle status
@@ -500,10 +504,14 @@ function startPlugin(devNum)
 		initVar(MYSID, "MinTemperature", "2000", deviceID)
 		initVar(MYSID, "MaxTemperature", "6500", deviceID)
 
-		initVar(MYSID, COMMANDS_SETPOWER, DEFAULT_ENDPOINT, deviceID)
 		initVar(MYSID, COMMANDS_SETBRIGHTNESS, DEFAULT_ENDPOINT, deviceID)
 		initVar(MYSID, COMMANDS_SETWHITETEMPERATURE, DEFAULT_ENDPOINT, deviceID)
 		initVar(MYSID, COMMANDS_SETRGBCOLOR, DEFAULT_ENDPOINT, deviceID)
+
+		local commandPower = initVar(MYSID, COMMANDS_SETPOWER, DEFAULT_ENDPOINT, deviceID)
+
+		-- upgrade code to support power off command
+		initVar(MYSID, COMMANDS_SETPOWEROFF, commandPower, deviceID)
 
 		-- device categories
 		local category_num = luup.attr_get("category_num", deviceID) or 0

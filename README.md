@@ -47,6 +47,8 @@ This plug-ins support different kind of virtual devices, so choose the one you w
 - Upnp Device Filename/Device File (legacy mode): *D_DimmableRGBLight1.xml*
 - Upnp Implementation Filename/Implementation file: *I_VirtualRGBW1.xml*
 
+If your light only supports RGB, please change variable *SupporteColor* to *R,G,B*. By default it's set to *W,D,R,G,B* to support white channels.
+
 ### Heater
 - Upnp Device Filename/Device File (2.0+, master/children mode): *D_VirtualHeater1.xml*
 - Upnp Device Filename/Device File (legacy mode): *D_Heater1.xml*
@@ -135,7 +137,7 @@ Set *SetBrightnessURL* variable to the corresponding HTTP call.
 
 For a custom device: ```http://mydevice/brigthness?v=%s```
 
-The %s parameter will be replace with the desired dimming (0/100).
+The %s parameter will be replace with the desired dimming (0/100). Leave 'http://' if not supported.
 
 #### Color (RGB Lights)
 Set *SetRGBColorURL* variable to the corresponding HTTP call.
@@ -149,7 +151,7 @@ Set *SetWhiteTemperatureURL* variable to the corresponding HTTP call.
 
 For a custom device: ```http://mydevice/setwhitemode?v=%s```
 
-The %s parameter will be replace with temperature (from 2000 to 6500 k).
+The %s parameter will be replace with temperature (from 2000 to 6500 k). Leave 'http://' if not supported.
 
 #### Sensors
 Set *SetTrippedURL* variable to the corresponding HTTP call (to trip).
