@@ -42,12 +42,13 @@ Many different devices could be mapped with this service.
 |---|---|---|
 |Interior|3|1|
 |Exterior|3|2|
-|In Wall||3|3|
+|In Wall|3|3|
 |Refrigerator|3|4|
 |Water Valve|3|7|
 |Relay|3|8|
 |Doorbell|30|0|
 |Garage Door|32|8|
+
 [More info here.](http://wiki.micasaverde.com/index.php/Luup_Device_Categories)
 
 ### Dimmers
@@ -60,6 +61,7 @@ Many different devices could be mapped with this service.
 |Bulb|2|1|
 |Plugged|2|2|
 |In wall|3|3|
+
 [More info here.](http://wiki.micasaverde.com/index.php/Luup_Device_Categories)
 
 ### RGB(CCT) Lights
