@@ -28,7 +28,6 @@ Version 2.0 introduced support for async updates of device's commands.
 
 If you want to automatically acknowledge the command, simply return a status code from 200 (included) to 400 (excluded). That's what devices will do anyway.
 
-
 If you want to control the result, simply return a different status code (ie 112) and then update the variable on your own via Vera/openLuup HTTP interface.
 
 This is useful if you have an API that supports retry logic and you want to reflect the real status of the external devices.
@@ -224,51 +223,42 @@ There's no limit to how many children a master could handle.
 It's suggested to have one master per controller and how many children you want.
 
 #### Switch On/Off (All)
-To turn ON, set *SetPowerURL* variable to the corresponding HTTP call.
-
-For Tasmota: ```http://mydevice/cm?cmnd=Power+On```
-
-For Shelly: ```http://mydevice/relay/0?turn=on```
-
-To turn OFF, set *SetPowerOffURL* variable to the corresponding HTTP call.
-
-For Tasmota: ```http://mydevice/cm?cmnd=Power+Off```
-
 *Attention: do not include %20 in your URL, this will cause problems.*
 
-For Shelly: ```http://mydevice/relay/0?turn=off```
+To turn ON, set *SetPowerURL* variable to the corresponding HTTP call.
+ - For Tasmota: ```http://mydevice/cm?cmnd=Power+On```
+ - For Shelly: ```http://mydevice/relay/0?turn=on```
+
+To turn OFF, set *SetPowerOffURL* variable to the corresponding HTTP call.
+ - For Tasmota: ```http://mydevice/cm?cmnd=Power+Off```
+ - For Shelly: ```http://mydevice/relay/0?turn=off```
 
 You can also specify only *SetPowerURL*, like this: ```http://mydevice/cm?cmnd=Power+%s```
 The %s parameter will be replace with On/Off (this very same case), based on the required action.
 
 #### Toggle (All)
 Set *SetToggleURL* variable to the corresponding HTTP call.
-
-For Tasmota: ```http://mydevice/cm?cmnd=Power+Toggle```
-
-For Shelly: ```http://mydevice/relay/0?turn=toggle```
+- For Tasmota: ```http://mydevice/cm?cmnd=Power+Toggle```
+- For Shelly: ```http://mydevice/relay/0?turn=toggle```
 
 No params required.
 If omitted (blank value or 'http://'), the device will try to change the status according to the local current status. (1.5.1+).
 
 #### Dimming (Dimmers, RGB Lights, Window Covers/Roller Shutters/Blinds)
 Set *SetBrightnessURL* variable to the corresponding HTTP call.
-
-For a custom device: ```http://mydevice/brigthness?v=%s```
+- For a custom device: ```http://mydevice/brigthness?v=%s```
 
 The %s parameter will be replace with the desired dimming (0/100). Leave 'http://' if not supported.
 
 #### Color (RGB Lights)
 Set *SetRGBColorURL* variable to the corresponding HTTP call.
-
-For a custom device: ```http://mydevice/setcolor?v=%s```
+- For a custom device: ```http://mydevice/setcolor?v=%s```
 
 The %s parameter will be replace with the RBG color.
 
 #### White Temperature (RGB Lights)
 Set *SetWhiteTemperatureURL* variable to the corresponding HTTP call.
-
-For a custom device: ```http://mydevice/setwhitemode?v=%s```
+ - For a custom device: ```http://mydevice/setwhitemode?v=%s```
 
 The %s parameter will be replace with temperature (from 2000 to 6500 k). Leave 'http://' if not supported.
 
@@ -280,31 +270,28 @@ The %s parameter will be replace with temperature (from 2000 to 6500 k). Leave '
 
 For a custom device: ```http://mydevice/tripped?v=%s```
 
-The %s parameter will be replace with status (1 for active, 0 for disabled). You can specify a complete URL if you want.
+The *%s* parameter will be replace with status (1 for active, 0 for disabled). You can omit it from the URL if you want.
 
-Device can be armed/disarmed via UI, and tripped/untripped via HTTP with a similar URL:
+Device can be armed/disarmed via UI, and tripped/untripped via HTTP similar to this:
 
 ```
 http://*veraip*/port_3480/data_request?id=variableset&DeviceNum=6&serviceId=urn:micasaverde-com:serviceId:SecuritySensor1&Variable=Tripped&Value=*1*
 ```
 
-where value is 1 when tripped, 0 when untripped.
+where *value* is *1* when tripped, *0* when untripped.
 
 #### Stop (Window Covers/Roller Shutters/Blinds)
 Set *SetMoveStopURL* variable to the corresponding HTTP call.
-
-For a custom device: ```http://mydevice/stop```
+ - For a custom device: ```http://mydevice/stop```
 
 No parameters are sent.
 
 #### Alarms
 Set *SetRequestArmModeURL* variable to the corresponding HTTP call to change the alarm state.
-
-For a custom device: ```http://mydevice/alarm/state?state=%s&pincode=%s```
+ - For a custom device: ```http://mydevice/alarm/state?state=%s&pincode=%s```
 
 Set *SetRequestPanicModeURL* variable to the corresponding HTTP call to request panic mode.
-
-For a custom device: ```http://mydevice/alarm/panic?state=%s```
+ - For a custom device: ```http://mydevice/alarm/panic?state=%s```
 
 Your script should update the variables *Alarm*, *AlarmMemory*, *LastAlarmActive*, *LastUser*, *VendorStatus*, *VendorStatusCode* and *VendorStatusData* if necessary, via standard LUUP HTTP call/code.
 
