@@ -1,7 +1,7 @@
 module("L_VirtualRGBW1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualRGBW"
-local _PLUGIN_VERSION = "2.0.2"
+local _PLUGIN_VERSION = "2.1.0"
 
 local debugMode = false
 
@@ -19,9 +19,6 @@ local COMMANDS_SETRGBCOLOR					= "SetRGBColorURL"
 local COMMANDS_SETWHITETEMPERATURE			= "SetWhiteTemperatureURL"
 local COMMANDS_TOGGLE						= "SetToggleURL"
 local DEFAULT_ENDPOINT						= "http://"
-
-local localColors = {} -- locally defined colors are saved here
-local mfgcolor = {}
 
 local function dump(t, seen)
 	if t == nil then return "nil" end
@@ -165,14 +162,50 @@ local function getChildren(masterID)
 end
 
 function httpGet(devNum, url, onSuccess)
+	local useCurl = url:lower():find("^curl://")
 	local ltn12 = require("ltn12")
 	local _, async = pcall(require, "http_async")
 	local response_body = {}
 	
-	D(devNum, "httpGet(%1)", type(async) == "table" and "async" or "sync")
+	D(devNum, "httpGet(%1)", useCurl and "curl" or type(async) == "table" and "async" or "sync")
+
+	-- curl
+	if useCurl then
+		local randommName = tostring(math.random(os.time()))
+		local fileName = "/tmp/httpcall" .. randommName:gsub("%s+", "") ..".dat" 
+		-- remove file
+		os.execute('/bin/rm ' .. fileName)
+
+		local httpCmd = string.format("curl -o '%s' %s", fileName, url:gsub("^curl://", ""))
+		local res, err = os.execute(httpCmd)
+
+		if res ~= 0 then
+			D(devNum, "[HttpGet] CURL failed: %1 %2: %3", res, err, httpCmd)
+			return false, nil
+		else
+			local file, err = io.open(fileName, "r")
+			if not file then
+				D(devNum, "[HttpGet] Cannot read response file: %1 - %2", fileName, err)
+
+				os.execute('/bin/rm ' .. fileName)
+				return false, nil
+			end
+
+			local response_body = file:read('*all')
+			file:close()
+
+			D(devNum, "[HttpGet] %1 - %2", httpCmd, (response_body or ""))
+			os.execute('/bin/rm ' .. fileName)
+
+			if onSuccess ~= nil then
+				D(devNum, "httpGet: onSuccess(%1)", status)
+				onSuccess()
+			end
+			return true, response_body
+		end
 
 	-- async
-	if type(async) == "table" then
+	elseif type(async) == "table" then
 		-- Async Handler for HTTP or HTTPS
 		async.request(
 		{
@@ -260,13 +293,15 @@ local function restoreBrightness(devNum)
 		setVar(DIMMERSID, "LoadLevelTarget", brightness, devNum)
 		setVar(DIMMERSID, "LoadLevelLast", brightness, devNum)
 
-		sendDeviceCommand(COMMANDS_SETBRIGHTNESS, {brightness}, devNum, function()
+		sendDeviceCommand(COMMANDS_SETBRIGHTNESS, brightness, devNum, function()
 			setVar(DIMMERSID, "LoadLevelStatus", brightness, devNum)
 		end)
 	end
 end
 
-function actionPower(status, devNum)
+function actionPower(devNum, status)
+	D(devNum, "actionPower(%1,%2)", devNum, status)
+
 	-- Switch on/off
 	if type(status) == "string" then
 		status = (tonumber(status) or 0) ~= 0
@@ -276,7 +311,7 @@ function actionPower(status, devNum)
 
 	setVar(SWITCHSID, "Target", status and "1" or "0", devNum)
 	
-	-- UI needs LoadLevelTarget/Status to comport with status according to Vera's rules.
+	-- UI needs LoadLevelTarget/Status to comport with status according to Vera's rules
 	if not status then
 		setVar(DIMMERSID, "LoadLevelTarget", 0, devNum)
 		setVar(DIMMERSID, "LoadLevelStatus", 0, devNum)
@@ -292,7 +327,9 @@ function actionPower(status, devNum)
 	end
 end
 
-function actionBrightness(newVal, devNum)
+function actionBrightness(devNum, newVal)
+	D(devNum, "actionBrightness(%1,%2)", devNum, newVal)
+
 	-- Dimming level change
 	newVal = tonumber(newVal) or 100
 	if newVal < 0 then
@@ -308,24 +345,24 @@ function actionBrightness(newVal, devNum)
 		local status = getVarNumeric(SWITCHSID, "Status", 0, devNum)
 		if status == 0 then
 			setVar(SWITCHSID, "Target", 1, devNum)
-			sendDeviceCommand(COMMANDS_SETPOWER, {"on"}, devNum, function()
+			sendDeviceCommand(COMMANDS_SETPOWER, "on", devNum, function()
 				setVar(SWITCHSID, "Status", 1, devNum)
 			end)
 		end
-		sendDeviceCommand(COMMANDS_SETBRIGHTNESS, {newVal}, devNum, function()
+		sendDeviceCommand(COMMANDS_SETBRIGHTNESS, newVal, devNum, function()
 			setVar(DIMMERSID, "LoadLevelStatus", newVal, devNum)
 		end)
 	elseif getVarNumeric(DIMMERSID, "AllowZeroLevel", 0, devNum) ~= 0 then
 		-- Level 0 allowed as on status, just go with it.
 		setVar(DIMMERSID, "LoadLevelStatus", newVal, devNum)
-		sendDeviceCommand(COMMANDS_SETBRIGHTNESS, {0}, devNum, function()
+		sendDeviceCommand(COMMANDS_SETBRIGHTNESS, 0, devNum, function()
 			setVar(DIMMERSID, "LoadLevelStatus", newVal, devNum)
 		end)
 	else
 		setVar(SWITCHSID, "Target", 0, devNum)
 
 		-- Level 0 (not allowed as an "on" status), switch light off.
-		sendDeviceCommand(COMMANDS_SETPOWEROFF, {"off"}, devNum, function()
+		sendDeviceCommand(COMMANDS_SETPOWEROFF, "off", devNum, function()
 			setVar(SWITCHSID, "Status", 0, devNum)
 			setVar(DIMMERSID, "LoadLevelStatus", 0, devNum)
 		end)
@@ -361,27 +398,47 @@ local function updateColor(devNum, w, c, r, g, b)
 	setVar(COLORSID, "CurrentColor", targetColor, devNum)
 end
 
-function actionSetColor(newVal, devNum, sendToDevice)
-	D(devNum, "actionSetColor(%1,%2)", newVal, devNum)
+function actionSetColor(devNum, newVal, sendToDevice)
+	D(devNum, "actionSetColor(%1,%2,%3)", devNum, newVal, sendToDevice)
 
 	local status = getVarNumeric(SWITCHSID, "Status", 0, devNum)
-	if status == 0 and sendToDevice then
+	local turnOnBeforeDim = getVarNumeric(DIMMERSID, "TurnOnBeforeDim", 0, devNum)
+	
+	if status == 0 and turnOnBeforeDim == 1 and sendToDevice then
 		setVar(SWITCHSID, "Target", 1, devNum)
-		sendDeviceCommand(COMMANDS_SETPOWER, {"on"}, devNum, function()
+		sendDeviceCommand(COMMANDS_SETPOWER, "on", devNum, function()
 			setVar(SWITCHSID, "Status", 1, devNum)
 		end)
 	end
 	local w, c, r, g, b
 
 	local s = split(newVal)
-	if #s == 3 then
+
+	if #newVal == 6 or #newVal == 7 then
+		-- #RRGGBB or RRGGBB
+		local startIndex = #newVal == 7 and 2 or 1
+		r = tonumber(string.sub(newVal, startIndex, 2), 16)
+		g = tonumber(string.sub(newVal, startIndex+2, startIndex+3), 16)
+		b = tonumber(string.sub(newVal, startIndex+4, startIndex+5), 16)
+		w, c = 0, 0
+		
+		D(devNum, "RGBFromHex(%1,%2,%3)", r, g, b)
+
+		if r ~= nil and g  ~= nil and  b ~= nil and sendToDevice then
+			sendDeviceCommand(COMMANDS_SETRGBCOLOR, {r, g, b}, devNum, function()
+				updateColor(devNum, w, c, r, g, b)
+			end)
+		end
+
+		restoreBrightness(devNum)
+	elseif #s == 3 then
 		-- R,G,B -- handle both 255,0,255 OR R255,G0,B255 value
 		r = tonumber(s[1]) or tonumber(string.sub(s[1], 2))
 		g = tonumber(s[2]) or tonumber(string.sub(s[2], 2))
 		b = tonumber(s[3]) or tonumber(string.sub(s[3], 2))
 		w, c = 0, 0
 		D(devNum, "RGB(%1,%2,%3)", r, g, b)
-		-- local rgb = r * 65536 + g * 256 + b
+		
 		if r ~= nil and g  ~= nil and  b ~= nil and sendToDevice then
 			sendDeviceCommand(COMMANDS_SETRGBCOLOR, {r, g, b}, devNum, function()
 				updateColor(devNum, w, c, r, g, b)
@@ -444,9 +501,11 @@ function actionSetColor(newVal, devNum, sendToDevice)
 
 		r, g, b = approximateRGB(temp)
 		if sendToDevice then
-			sendDeviceCommand(COMMANDS_SETWHITETEMPERATURE, {temp}, devNum, function()
+			sendDeviceCommand(COMMANDS_SETWHITETEMPERATURE, temp, devNum, function()
 				updateColor(devNum, w, c, r, g, b)
 			end)
+		else
+			updateColor(devNum, w, c, r, g, b)
 		end
 		restoreBrightness(devNum)
 
@@ -465,7 +524,7 @@ function actionToggleState(devNum)
 
 	if (cmdUrl == DEFAULT_ENDPOINT or cmdUrl == "") then
 		-- toggle by using the current status
-		actionPower(status == 1 and 0 or 1, devNum)
+		actionPower(devNum, status == 1 and 0 or 1)
 	else
 		-- update variables
 		setVar(SWITCHSID, "Target", status == 1 and 0 or 1, devNum)

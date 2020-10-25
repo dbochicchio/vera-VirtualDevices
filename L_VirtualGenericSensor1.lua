@@ -1,7 +1,7 @@
 module("L_VirtualGenericSensor1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualGenericSensor"
-local _PLUGIN_VERSION = "2.0.2 "
+local _PLUGIN_VERSION = "2.1.0"
 
 local debugMode = false
 
@@ -166,14 +166,50 @@ local function getChildren(masterID)
 end
 
 function httpGet(devNum, url, onSuccess)
+	local useCurl = url:lower():find("^curl://")
 	local ltn12 = require("ltn12")
 	local _, async = pcall(require, "http_async")
 	local response_body = {}
 	
-	D(devNum, "httpGet(%1)", type(async) == "table" and "async" or "sync")
+	D(devNum, "httpGet(%1)", useCurl and "curl" or type(async) == "table" and "async" or "sync")
+
+	-- curl
+	if useCurl then
+		local randommName = tostring(math.random(os.time()))
+		local fileName = "/tmp/httpcall" .. randommName:gsub("%s+", "") ..".dat" 
+		-- remove file
+		os.execute('/bin/rm ' .. fileName)
+
+		local httpCmd = string.format("curl -o '%s' %s", fileName, url:gsub("^curl://", ""))
+		local res, err = os.execute(httpCmd)
+
+		if res ~= 0 then
+			D(devNum, "[HttpGet] CURL failed: %1 %2: %3", res, err, httpCmd)
+			return false, nil
+		else
+			local file, err = io.open(fileName, "r")
+			if not file then
+				D(devNum, "[HttpGet] Cannot read response file: %1 - %2", fileName, err)
+
+				os.execute('/bin/rm ' .. fileName)
+				return false, nil
+			end
+
+			local response_body = file:read('*all')
+			file:close()
+
+			D(devNum, "[HttpGet] %1 - %2", httpCmd, (response_body or ""))
+			os.execute('/bin/rm ' .. fileName)
+
+			if onSuccess ~= nil then
+				D(devNum, "httpGet: onSuccess(%1)", status)
+				onSuccess()
+			end
+			return true, response_body
+		end
 
 	-- async
-	if type(async) == "table" then
+	elseif type(async) == "table" then
 		-- Async Handler for HTTP or HTTPS
 		async.request(
 		{
@@ -252,7 +288,7 @@ local function sendDeviceCommand(cmd, params, devNum, onSuccess)
 	return false
 end
 
--- turn on/off compatibility
+-- implementation
 function actionArmed(devNum, state)
 	state = tostring(state or "0")
 	
@@ -286,16 +322,11 @@ function sensorWatch(devNum, sid, var, oldVal, newVal)
 		if var == "Tripped" then
 			actionTripped(devNum, newVal or "0")
 		end
---	elseif sid == GENERICSENSORSID then
---		if (newVal or "") ~= "" then
---			setVar(TEMPSETPOINTSID, "CurrentSetpoint", newVal, devNum)
---		end
 	end
 end
 
 function startPlugin(devNum)
 	L(devNum, "Plugin starting")
-
 
 	-- enumerate children
 	local children = getChildren(devNum)

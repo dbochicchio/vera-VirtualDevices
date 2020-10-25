@@ -4,7 +4,7 @@
 		function startupPlugin(devNum)
 		luup.log("VirtualSceneController starting...")
 		VirtualSceneController1 = require("L_VirtualSceneController1")
-		sensorWatch = VirtualSceneController1.sensorWatch
+		SCSensorWatch = VirtualSceneController1.sensorWatch
 		return VirtualSceneController1.startPlugin(devNum)
 		end
 	</functions>

@@ -4,6 +4,7 @@
 		function startupPlugin(devNum)
 			luup.log("VirtualBinaryLight starting...")
 			VirtualBinaryLight1 = require("L_VirtualBinaryLight1")
+			updateMeters = VirtualBinaryLight1.updateMeters
 			return VirtualBinaryLight1.startPlugin(devNum)
 		end
 	</functions>
@@ -13,7 +14,7 @@
 			<serviceId>urn:upnp-org:serviceId:SwitchPower1</serviceId>
 			<name>SetTarget</name>
 			<run>
-				VirtualBinaryLight1.actionPower(lul_settings.newTargetValue, lul_device)
+				VirtualBinaryLight1.actionPower(lul_device, lul_settings.newTargetValue)
 				return 4,0
 			</run>
 		</action>
@@ -28,7 +29,7 @@
 			<serviceId>urn:upnp-org:serviceId:Dimming1</serviceId>
 			<name>SetLoadLevelTarget</name>
 			<run>
-				VirtualBinaryLight1.actionBrightness(lul_settings.newLoadlevelTarget, lul_device)
+				VirtualBinaryLight1.actionBrightness(lul_device, lul_settings.newLoadlevelTarget)
 				return 4,0
 			</run>
 		</action>
@@ -36,7 +37,7 @@
 			<serviceId>urn:upnp-org:serviceId:WindowCovering1</serviceId>
 			<name>Up</name>
 			<run>
-				VirtualBinaryLight1.actionBrightness(100, lul_device)
+				VirtualBinaryLight1.actionBrightness(lul_device, 100)
 				return 4,0
 			</run>
 		</action>
@@ -44,7 +45,7 @@
 			<serviceId>urn:upnp-org:serviceId:WindowCovering1</serviceId>
 			<name>Down</name>
 			<run>
-				VirtualBinaryLight1.actionBrightness(0, lul_device)
+				VirtualBinaryLight1.actionBrightness(lul_device, 0)
 				return 4,0
 			</run>
 		</action>

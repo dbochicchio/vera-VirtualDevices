@@ -1,7 +1,7 @@
 module("L_VirtualBinaryLight1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualBinaryLight"
-local _PLUGIN_VERSION = "2.0.2"
+local _PLUGIN_VERSION = "2.1.0"
 
 local debugMode = false
 
@@ -10,11 +10,13 @@ local SWITCHSID								= "urn:upnp-org:serviceId:SwitchPower1"
 local DIMMERSID								= "urn:upnp-org:serviceId:Dimming1"
 local HASID									= "urn:micasaverde-com:serviceId:HaDevice1"
 local BLINDSID								= "urn:upnp-org:serviceId:WindowCovering1"
+local ENERGYMETERSID						= "urn:micasaverde-com:serviceId:EnergyMetering1"
 
 local COMMANDS_SETPOWER						= "SetPowerURL"
 local COMMANDS_SETPOWEROFF					= "SetPowerOffURL"
 local COMMANDS_SETBRIGHTNESS				= "SetBrightnessURL"
 local COMMANDS_TOGGLE						= "SetToggleURL"
+local COMMANDS_UPDATEMETERS					= "SetUpdateMetersURL"
 local COMMANDS_MOVESTOP						= "SetMoveStopURL"
 local DEFAULT_ENDPOINT						= "http://"
 
@@ -161,14 +163,50 @@ local function getChildren(masterID)
 end
 
 function httpGet(devNum, url, onSuccess)
+	local useCurl = url:lower():find("^curl://")
 	local ltn12 = require("ltn12")
 	local _, async = pcall(require, "http_async")
 	local response_body = {}
 	
-	D(devNum, "httpGet(%1)", type(async) == "table" and "async" or "sync")
+	D(devNum, "httpGet(%1)", useCurl and "curl" or type(async) == "table" and "async" or "sync")
+
+	-- curl
+	if useCurl then
+		local randommName = tostring(math.random(os.time()))
+		local fileName = "/tmp/httpcall" .. randommName:gsub("%s+", "") ..".dat" 
+		-- remove file
+		os.execute('/bin/rm ' .. fileName)
+
+		local httpCmd = string.format("curl -o '%s' %s", fileName, url:gsub("^curl://", ""))
+		local res, err = os.execute(httpCmd)
+
+		if res ~= 0 then
+			D(devNum, "[HttpGet] CURL failed: %1 %2: %3", res, err, httpCmd)
+			return false, nil
+		else
+			local file, err = io.open(fileName, "r")
+			if not file then
+				D(devNum, "[HttpGet] Cannot read response file: %1 - %2", fileName, err)
+
+				os.execute('/bin/rm ' .. fileName)
+				return false, nil
+			end
+
+			local response_body = file:read('*all')
+			file:close()
+
+			D(devNum, "[HttpGet] %1 - %2", httpCmd, (response_body or ""))
+			os.execute('/bin/rm ' .. fileName)
+
+			if onSuccess ~= nil then
+				D(devNum, "httpGet: onSuccess(%1)", status)
+				onSuccess(response_body)
+			end
+			return true, response_body
+		end
 
 	-- async
-	if type(async) == "table" then
+	elseif type(async) == "table" then
 		-- Async Handler for HTTP or HTTPS
 		async.request(
 		{
@@ -187,7 +225,7 @@ function httpGet(devNum, url, onSuccess)
 
 			if onSuccess ~= nil and status >= 200 and status < 400 then
 				D(devNum, "httpGet: onSuccess(%1)", status)
-				onSuccess()
+				onSuccess(table.concat(response_body or ""))
 			end
 		end)
 
@@ -212,7 +250,7 @@ function httpGet(devNum, url, onSuccess)
 		if status >= 200 and status < 400 then
 			if onSuccess ~= nil then
 				D(devNum, "httpGet: onSuccess(%1)", status)
-				onSuccess()
+				onSuccess(table.concat(response_body or ""))
 			end
 
 			return true, tostring(table.concat(response_body or ""))
@@ -254,13 +292,15 @@ local function restoreBrightness(devNum)
 
 	if brightness > 0 and brightnessCurrent ~= brightness then
 		setVar(DIMMERSID, "LoadLevelTarget", brightness, devNum)	
-		sendDeviceCommand(COMMANDS_SETBRIGHTNESS, {brightness}, devNum, function()
+		sendDeviceCommand(COMMANDS_SETBRIGHTNESS, brightness, devNum, function()
 				setVar(DIMMERSID, "LoadLevelStatus", brightness, devNum)
 		end)
 	end
 end
 
-function actionPower(status, devNum)
+function actionPower(devNum, status)
+	D(devNum, "actionPower(%1,%2)", devNum, status)
+
 	-- Switch on/off
 	if type(status) == "string" then
 		status = (tonumber(status) or 0) ~= 0
@@ -298,7 +338,9 @@ function actionPower(status, devNum)
 	end
 end
 
-function actionBrightness(newVal, devNum)
+function actionBrightness(devNum, newVal)
+	D(devNum, "actionBrightness(%1,%2)", devNum, newVal)
+
 	-- dimmer or not?
 	local deviceType = luup.attr_get("device_file", devNum)
 	local isDimmer = deviceType == "D_DimmableLight1.xml" or deviceType == "D_VirtualDimmableLight1.xml" 
@@ -321,13 +363,13 @@ function actionBrightness(newVal, devNum)
 			local status = getVarNumeric(SWITCHSID, "Status", 0, devNum)
 			if status == 0 then
 				setVar(SWITCHSID, "Target", 1, devNum)	
-				sendDeviceCommand(COMMANDS_SETPOWER, {"on"}, devNum, function()
+				sendDeviceCommand(COMMANDS_SETPOWER, "on", devNum, function()
 					setVar(SWITCHSID, "Status", 1, devNum)
 				end)
 			end
 		end
 
-		sendDeviceCommand(COMMANDS_SETBRIGHTNESS, {newVal}, devNum, function()
+		sendDeviceCommand(COMMANDS_SETBRIGHTNESS, newVal, devNum, function()
 			setVar(DIMMERSID, "LoadLevelStatus", newVal, devNum)
 		end)
 	elseif getVarNumeric(DIMMERSID, "AllowZeroLevel", 0, devNum) ~= 0 then
@@ -338,7 +380,7 @@ function actionBrightness(newVal, devNum)
 	else
 		setVar(SWITCHSID, "Target", 0, devNum)	
 		-- Level 0 (not allowed as an "on" status), switch light off.
-		sendDeviceCommand(COMMANDS_SETPOWEROFF, {"off"}, devNum, function()
+		sendDeviceCommand(COMMANDS_SETPOWEROFF, "off", devNum, function()
 			setVar(SWITCHSID, "Status", 0, devNum)
 			setVar(DIMMERSID, "LoadLevelStatus", 0, devNum)
 		end)
@@ -369,6 +411,48 @@ end
 
 -- stop for blinds
 function actionStop(devNum) sendDeviceCommand(COMMANDS_MOVESTOP, nil, devNum) end
+
+-- meters support
+function updateMeters(devNum)
+	function getValue(data, path)
+		D(devNum, "updateMeters.getValue(%1)", path)
+		local x = data
+		for field in path: gmatch "[^%.%[%]]+" do
+			x = x[tonumber(field) or field]
+		end
+		return x
+	end
+
+	local kwhPath = getVar(MYSID, "MeterPowerFormat", "", devNum)
+	local wattsPath = getVar(MYSID, "MeterTotalFormat", "", devNum)
+	local meterUpdate = getVarNumeric(MYSID, "MeterUpdate", 60, devNum)
+	local url = getVar(MYSID, COMMANDS_UPDATEMETERS, DEFAULT_ENDPOINT, devNum)
+
+	D(devNum, "updateMeters(%1)", url)
+
+	httpGet(devNum, url, function(response)
+		--response = '{"wifi_sta":{"connected":true,"ssid":"The Godfather","ip":"192.168.1.101","rssi":-49},"cloud":{"enabled":true,"connected":true},"mqtt":{"connected":false},"time":"18:29","unixtime":1602700175,"serial":2916,"has_update":false,"mac":"98F4ABF35BEC","cfg_changed_cnt":0,"actions_stats":{"skipped":0},"relays":[{"ison":false,"has_timer":false,"timer_started":0,"timer_duration":0,"timer_remaining":0,"overpower":false,"overtemperature":false,"is_valid":true,"source":"http"},{"ison":false,"has_timer":false,"timer_started":0,"timer_duration":0,"timer_remaining":0,"overpower":false,"overtemperature":false,"is_valid":true,"source":"http"}],"meters":[{"power":180.00,"overpower":0.00,"is_valid":true,"timestamp":1602700175,"counters":[0.000, 0.000, 0.000],"total":3696},{"power":0.00,"overpower":0.00,"is_valid":true,"timestamp":1602700175,"counters":[0.000, 0.000, 0.000],"total":6249}],"inputs":[{"input":0,"event":"","event_cnt":0},{"input":0,"event":"","event_cnt":0}],"temperature":54.69,"overtemperature":false,"tmp":{"tC":54.69,"tF":130.44, "is_valid":true},"update":{"status":"idle","has_update":false,"new_version":"20200827-065456/v1.8.3@4a8bc427","old_version":"20200827-065456/v1.8.3@4a8bc427"},"ram_total":49504,"ram_free":31480,"fs_size":233681,"fs_free":140811,"voltage":242.22,"uptime":4093887}'
+		D(devNum, "updateMeters: %1", response)
+
+		local json = require "dkjson"
+		local data = json.decode(response)
+
+		if kwhPath ~= "" then
+			local value = getValue(data, kwhPath)
+			D(devNum, "updateMeters - KWH %1", value)
+			setVar(ENERGYMETERSID, "KWH", value, devNum)
+		end
+
+		if wattsPath ~= "" then
+			local value = getValue(data, wattsPath)
+			D(devNum, "updateMeters - Watts %1", value)
+			setVar(ENERGYMETERSID, "Watts", value, devNum)
+		end
+	end)
+
+	L(devNum, "updateMeters: next call in %1 secs", meterUpdate)
+	luup.call_delay("updateMeters", meterUpdate, devNum)
+end
 
 function startPlugin(devNum)
 	L(devNum, "Plugin starting")
@@ -418,6 +502,14 @@ function startPlugin(devNum)
 		-- normal switch
 		local commandPower = initVar(MYSID, COMMANDS_SETPOWER, DEFAULT_ENDPOINT, deviceID)
 		initVar(MYSID, COMMANDS_TOGGLE, DEFAULT_ENDPOINT, deviceID)
+
+		-- meters
+		local commandUpdateMeters = initVar(MYSID, COMMANDS_UPDATEMETERS, DEFAULT_ENDPOINT, deviceID)
+		initVar(MYSID, "MeterPowerFormat", "meters[1].power", deviceID)
+		initVar(MYSID, "MeterTotalFormat", "meters[1].total", deviceID)
+		initVar(MYSID, "MeterUpdate", 60, deviceID)
+
+		if commandUpdateMeters ~= DEFAULT_ENDPOINT then updateMeters(deviceID) end
 
 		-- upgrade code
 		initVar(MYSID, COMMANDS_SETPOWEROFF, commandPower, deviceID)

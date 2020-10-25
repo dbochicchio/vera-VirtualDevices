@@ -13,7 +13,7 @@
 			<serviceId>urn:upnp-org:serviceId:SwitchPower1</serviceId>
 			<name>SetTarget</name>
 			<run>
-				VirtualRGBW1.actionPower(lul_settings.newTargetValue,lul_device)
+				VirtualRGBW1.actionPower(lul_device, lul_settings.newTargetValue)
 				return 4,0
 			</run>
 		</action>
@@ -28,7 +28,7 @@
 			<serviceId>urn:upnp-org:serviceId:Dimming1</serviceId>
 			<name>SetLoadLevelTarget</name>
 			<run>
-				VirtualRGBW1.actionBrightness(lul_settings.newLoadlevelTarget,lul_device)
+				VirtualRGBW1.actionBrightness(lul_device, lul_settings.newLoadlevelTarget)
 				return 4,0
 			</run>
 		</action>
@@ -36,7 +36,7 @@
 			<serviceId>urn:micasaverde-com:serviceId:Color1</serviceId>
 			<name>SetColor</name>
 			<run>
-				VirtualRGBW1.actionSetColor(lul_settings.newColorTarget,lul_device,true)
+				VirtualRGBW1.actionSetColor(lul_device,lul_settings.newColorTarget,true)
 				return 4,0
 			</run>
 		</action>
@@ -44,7 +44,7 @@
 			<serviceId>urn:micasaverde-com:serviceId:Color1</serviceId>
 			<name>SetColorRGB</name>
 			<run>
-				VirtualRGBW1.actionSetColor(lul_settings.newColorRGBTarget,lul_device,true)
+				VirtualRGBW1.actionSetColor(lul_device,lul_settings.newColorRGBTarget,true)
 				return 4,0
 			</run>
 		</action>
@@ -52,7 +52,7 @@
 			<serviceId>urn:micasaverde-com:serviceId:Color1</serviceId>
 			<name>SetColorTemp</name>
 			<run>
-				VirtualRGBW1.actionSetColor(lul_settings.newColorTempTarget,lul_device,true)
+				VirtualRGBW1.actionSetColor(lul_device,lul_settings.newColorTempTarget,true)
 				return 4,0
 			</run>
 		</action>

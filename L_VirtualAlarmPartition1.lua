@@ -1,15 +1,18 @@
-module("L_VirtualSceneController1", package.seeall)
+module("L_VirtualAlarmPartition1", package.seeall)
 
-local _PLUGIN_NAME = "VirtualSceneController"
+local _PLUGIN_NAME = "VirtualAlarmPartition"
 local _PLUGIN_VERSION = "2.1.0"
 
 local debugMode = false
 
-local MYSID									= "urn:bochicchio-com:serviceId:VirtualSceneController1"
-local SCENESID								= "urn:micasaverde-com:serviceId:SceneController1"
-local SCENELEDSID							= "urn:micasaverde-com:serviceId:SceneControllerLED1"
+local MYSID									= "urn:bochicchio-com:serviceId:VirtualAlarmPartition1"
+local SECURITYSID							= "urn:micasaverde-com:serviceId:SecuritySensor1"
 local HASID									= "urn:micasaverde-com:serviceId:HaDevice1"
+local ALARMSID								= "urn:micasaverde-com:serviceId:AlarmPartition2"
+local ALTUISID								= "urn:upnp-org:serviceId:altui1"
 
+local COMMANDS_ARM							= "SetRequestArmModeURL"
+local COMMANDS_PANICMODE					= "SetRequestPanicModeURL"
 local DEFAULT_ENDPOINT						= "http://"
 
 local deviceID = -1
@@ -277,26 +280,62 @@ local function sendDeviceCommand(cmd, params, devNum, onSuccess)
 	elseif params ~= nil then
 		table.insert(pv, tostring(params))
 	end
-	local pstr = table.concat(pv, ",")
+	--local pstr = table.concat(pv, ",")
 
 	local cmdUrl = getVar(MYSID, cmd, DEFAULT_ENDPOINT, devNum)
-	if (cmdUrl ~= DEFAULT_ENDPOINT) then return httpGet(devNum, string.format(cmdUrl, pstr), onSuccess) end
+	if (cmdUrl ~= DEFAULT_ENDPOINT) then 
+		return httpGet(devNum, string.format(cmdUrl, unpack(pv)), onSuccess)
+	end
 
 	return false
+end
+
+-- implementation
+local function setVerboseDisplay(devNum, line1, line2)
+	if line1 then setVar(ALTUISID, "DisplayLine1", line1 or "", devNum) end
+	if line2 then setVar(ALTUISID, "DisplayLine2", line2 or "", devNum) end
+end
+
+function actionRequestArmMode(devNum, state, pinCode)
+	D(devNum, "actionArmed(%1,%2,%3,%4)", devNum, state, pinCode, COMMANDS_ARM)
+
+	-- send command
+	sendDeviceCommand(COMMANDS_ARM, {state or "Disarmed", pinCode or ""}, devNum, function()
+		local simpleState = state ~= "Disarmed" and "Armed" or "Disarmed"
+		setVerboseDisplay(devNum, string.format('State: %s%s', simpleState, simpleState == "Disarmed" and "" or (" (" .. state .. ")")))
+		setVar(ALARMSID, "ArmMode", simpleState, devNum)
+		setVar(ALARMSID, "DetailedArmMode", state, devNum)
+	end)
+end
+
+function actionRequestPanicMode(devNum, state)
+	D(devNum, "actionTripped(%1,%2,%3)", devNum, state, state == "1" and COMMANDS_TRIPPED or COMMANDS_UNTRIPPED)
+
+	-- send command
+	sendDeviceCommand(COMMANDS_PANICMODE, state, devNum, function()
+		--setVar(ALARMSID, "ArmMode", state, devNum)
+	end)
 end
 
 -- Watch callback
 function sensorWatch(devNum, sid, var, oldVal, newVal)
 	D(devNum, "sensorWatch(%1,%2,%3,%4,%5)", devNum, sid, var, oldVal, newVal)
 
-	--if oldVal == newVal then return end
+	if oldVal == newVal then return end
 
-	if sid == SCENESID then
-		if var == "sl_SceneActivated" then
-			setVar(SCENESID, "LastSceneID", newVal, devNum)
-			setVar(SCENESID, "LastSceneTime", os.time(), devNum)
+	if sid == ALARMSID then
+		if var == "Alarm" and (newVal or false) == true then
+			setVerboseDisplay(devNum, nil, 'Alarm: triggered')
+		elseif var == "VendorStatus" or var == "LastUser" then
+			updateStatus(devNum)
 		end
 	end
+end
+
+function updateStatus(devNum)
+	local vendorStatus = getVar(ALARMSID, "VendorStatus", "", devNum)
+	local lastUser = getVar(ALARMSID, "LastUser", "", devNum)
+	setVerboseDisplay(devNum, nil, string.format('Status: %s - %s', vendorStatus, lastUser))
 end
 
 function startPlugin(devNum)
@@ -309,29 +348,34 @@ function startPlugin(devNum)
 
 		-- generic init
 		initVar(MYSID, "DebugMode", 0, deviceID)
-		setVar(HASID, "CommFailure", 0, deviceID)
 
-		-- scene controller init
-		initVar(SCENESID, "NumButtons", "15,1-1-1=ui7_lang_tap_button 1,2-1-2=ui7_lang_double_tap_button 1,3-1-3=ui7_lang_triple_tap_button 1,4-1-4=ui7_lang_hold_button 1,5-1-5=ui7_lang_release_button 1,6-1-6=ui7_lang_tap_button 2,7-1-7=ui7_lang_double_tap_button 2,8-1-8=ui7_lang_triple_tap_button 2,9-1-9=ui7_lang_hold_button 2,10-1-10=ui7_lang_release_button 2,11-1-6=ui7_lang_tap_button 3,12-1-7=ui7_lang_double_tap_button 3,13-1-8=ui7_lang_triple_tap_button 3,14-1-9=ui7_lang_hold_button 3,15-1-10=ui7_lang_release_button 3", deviceID)
-		initVar(SCENESID, "ButtonMapping", "1-0-1,1-3-2,1-4-3,1-2-4,1-1-5,2-0-6,2-3-7,2-4-8,2-2-9,2-1-10,3-0-11,3-3-12,3-4-13,3-2-14,3-1-15", deviceID)
+		-- sensors init
+		initVar(ALARMSID, "Alarm", "None", deviceID)
+		initVar(ALARMSID, "ArmMode", "Disarmed", deviceID)
+		initVar(ALARMSID, "DetailedArmMode", "Ready", deviceID)
+		initVar(ALARMSID, "LastAlarmActive", "0", deviceID)
+		initVar(ALARMSID, "VendorStatus", "Disarmed", deviceID)
+		initVar(ALARMSID, "VendorStatusCode", "", deviceID)
+		initVar(ALARMSID, "LastUser", "", deviceID)
+
+		-- http calls init
+		initVar(MYSID, COMMANDS_ARM, DEFAULT_ENDPOINT, deviceID)
+		initVar(MYSID, COMMANDS_PANICMODE, DEFAULT_ENDPOINT, deviceID)
 
 		-- set at first run, then make it configurable
 		if luup.attr_get("category_num", deviceID) == nil then
-			local category_num = 14
-			luup.attr_set("category_num", category_num, deviceID) -- security sensor
+			local category_num = 23
+			luup.attr_set("category_num", category_num, deviceID) 
 		end
-
-		-- watches
-		luup.variable_watch("SCSensorWatch", SCENESID, "sl_SceneActivated", deviceID)
-		--luup.variable_watch("SCSensorWatch", SECURITYSID, "Armed", deviceID)
-
-		initVar(SCENESID, "sl_SceneActivated", "0", deviceID)
-		initVar(SCENESID, "sl_SceneDeactivated", "0", deviceID)
-		initVar(SCENESID, "Scenes", "", deviceID)
 
 		setVar(HASID, "Configured", 1, deviceID)
 		setVar(HASID, "CommFailure", 0, deviceID)
-		
+
+		-- watches
+		luup.variable_watch("AlarmSensorWatch", ALARMSID, "Alarm", deviceID)
+		luup.variable_watch("AlarmSensorWatch", ALARMSID, "LastUser", deviceID)
+		luup.variable_watch("AlarmSensorWatch", ALARMSID, "VendorStatus", deviceID)
+
 		-- status
 		luup.set_failure(0, deviceID)
 

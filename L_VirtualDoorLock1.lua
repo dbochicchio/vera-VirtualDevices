@@ -1,15 +1,18 @@
-module("L_VirtualSceneController1", package.seeall)
+module("L_VirtualDoorLock1", package.seeall)
 
-local _PLUGIN_NAME = "VirtualSceneController"
+local _PLUGIN_NAME = "VirtualDoorLock"
 local _PLUGIN_VERSION = "2.1.0"
 
 local debugMode = false
 
-local MYSID									= "urn:bochicchio-com:serviceId:VirtualSceneController1"
-local SCENESID								= "urn:micasaverde-com:serviceId:SceneController1"
-local SCENELEDSID							= "urn:micasaverde-com:serviceId:SceneControllerLED1"
+local MYSID									= "urn:bochicchio-com:serviceId:VirtualDoorLock1"
+local SECURITYSID							= "urn:micasaverde-com:serviceId:SecuritySensor1"
+local SWITCHSID								= "urn:upnp-org:serviceId:SwitchPower1"
+local LOCKSID								= "urn:micasaverde-com:serviceId:DoorLock1"
 local HASID									= "urn:micasaverde-com:serviceId:HaDevice1"
 
+local COMMANDS_LOCK							= "SetLockURL"
+local COMMANDS_UNLOCK						= "SetUnLockURL"
 local DEFAULT_ENDPOINT						= "http://"
 
 local deviceID = -1
@@ -285,16 +288,33 @@ local function sendDeviceCommand(cmd, params, devNum, onSuccess)
 	return false
 end
 
+-- implementation
+function actionLock(devNum, state)
+	state = tostring(state or "0")
+	
+	D(devNum, "actionLock(%1,%2,%3)", devNum, state, state == "1" and COMMANDS_ARMED or COMMANDS_UNARMED)
+
+	-- send command
+	sendDeviceCommand(state == "1" and COMMANDS_LOCK or COMMANDS_UNLOCK, state, devNum, function()
+		setVar(LOCKSID, "Status", state, devNum)
+		setVar(SWITCHSID, "Status", state, devNum)
+	end)
+end
+
 -- Watch callback
-function sensorWatch(devNum, sid, var, oldVal, newVal)
-	D(devNum, "sensorWatch(%1,%2,%3,%4,%5)", devNum, sid, var, oldVal, newVal)
+function virtualDoorLockWatchSync(devNum, sid, var, oldVal, newVal)
+	D(devNum, "virtualDoorLockWatchSync(%1,%2,%3,%4,%5)", devNum, sid, var, oldVal, newVal)
 
-	--if oldVal == newVal then return end
+	if oldVal == newVal then return end
 
-	if sid == SCENESID then
-		if var == "sl_SceneActivated" then
-			setVar(SCENESID, "LastSceneID", newVal, devNum)
-			setVar(SCENESID, "LastSceneTime", os.time(), devNum)
+	if sid == SECURITYSID then
+		if var == "Tripped" then
+			local masterID = getVarNumeric(MYSID, "DoorLockDeviceID", 0, devNum)
+			if masterID > 0 then
+				local v = tostring(newVal or "0") == "0" and "1" or "0"
+				setVar(LOCKSID, "Status", v, masterID)
+				setVar(SWITCHSID, "Status", v, masterID)
+			end
 		end
 	end
 end
@@ -309,29 +329,36 @@ function startPlugin(devNum)
 
 		-- generic init
 		initVar(MYSID, "DebugMode", 0, deviceID)
-		setVar(HASID, "CommFailure", 0, deviceID)
 
-		-- scene controller init
-		initVar(SCENESID, "NumButtons", "15,1-1-1=ui7_lang_tap_button 1,2-1-2=ui7_lang_double_tap_button 1,3-1-3=ui7_lang_triple_tap_button 1,4-1-4=ui7_lang_hold_button 1,5-1-5=ui7_lang_release_button 1,6-1-6=ui7_lang_tap_button 2,7-1-7=ui7_lang_double_tap_button 2,8-1-8=ui7_lang_triple_tap_button 2,9-1-9=ui7_lang_hold_button 2,10-1-10=ui7_lang_release_button 2,11-1-6=ui7_lang_tap_button 3,12-1-7=ui7_lang_double_tap_button 3,13-1-8=ui7_lang_triple_tap_button 3,14-1-9=ui7_lang_hold_button 3,15-1-10=ui7_lang_release_button 3", deviceID)
-		initVar(SCENESID, "ButtonMapping", "1-0-1,1-3-2,1-4-3,1-2-4,1-1-5,2-0-6,2-3-7,2-4-8,2-2-9,2-1-10,3-0-11,3-3-12,3-4-13,3-2-14,3-1-15", deviceID)
+		-- sensors init
+		--initVar(SECURITYSID, "Armed", "0", deviceID)
+		--initVar(SECURITYSID, "Tripped", "0", deviceID)
+
+		-- http calls init
+		initVar(MYSID, COMMANDS_LOCK, DEFAULT_ENDPOINT, deviceID)
+		initVar(MYSID, COMMANDS_UNLOCK, DEFAULT_ENDPOINT, deviceID)
 
 		-- set at first run, then make it configurable
 		if luup.attr_get("category_num", deviceID) == nil then
-			local category_num = 14
+			local category_num = 7
 			luup.attr_set("category_num", category_num, deviceID) -- security sensor
 		end
 
 		-- watches
-		luup.variable_watch("SCSensorWatch", SCENESID, "sl_SceneActivated", deviceID)
-		--luup.variable_watch("SCSensorWatch", SECURITYSID, "Armed", deviceID)
+		-- external sensor
+		local sensorDeviceID = tonumber((initVar(MYSID, "SensorDeviceID", 0, deviceID)))
+		if sensorDeviceID > 0 then
+			local currentStatus = getVarNumeric(SECURITYSID, "Tripped", 0, sensorDeviceID)
+			D(deviceID, "Sensor startup sync: %1 - #%2", currentStatus, sensorDeviceID)
+			setVar(LOCKSID, "Status", currentStatus, deviceID)
+			setVar(MYSID, "DoorLockDeviceID", deviceID, sensorDeviceID) -- save door lock ID in the device sensor, to handle callbacks
 
-		initVar(SCENESID, "sl_SceneActivated", "0", deviceID)
-		initVar(SCENESID, "sl_SceneDeactivated", "0", deviceID)
-		initVar(SCENESID, "Scenes", "", deviceID)
+			luup.variable_watch("virtualDoorLockWatchSync", SECURITYSID, "Tripped", sensorDeviceID)
+		end
 
 		setVar(HASID, "Configured", 1, deviceID)
 		setVar(HASID, "CommFailure", 0, deviceID)
-		
+
 		-- status
 		luup.set_failure(0, deviceID)
 

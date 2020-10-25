@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<implementation>
+	<functions>
+		function startupPlugin(devNum)
+			luup.log("VirtualAlarmPartition starting...")
+			VirtualAlarmPartition1 = require("L_VirtualAlarmPartition1")
+			AlarmSensorWatch = VirtualAlarmPartition1.sensorWatch
+			return VirtualAlarmPartition1.startPlugin(devNum)
+		end
+	</functions>
+	<startup>startupPlugin</startup>
+	<actionList>
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:AlarmPartition2</serviceId>
+			<name>RequestArmMode</name>
+			<run>
+				VirtualAlarmPartition1.actionRequestArmMode(lul_device, lul_settings.State, lul_settings.PINCode)
+				return 4,0
+			</run>
+		</action>
+
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:AlarmPartition2</serviceId>
+			<name>RequestQuickArmMode</name>
+			<run>
+				VirtualAlarmPartition1.actionRequestArmMode(lul_device, lul_settings.State)
+				return 4,0
+			</run>
+		</action>
+
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:AlarmPartition2</serviceId>
+			<name>RequestPanicMode</name>
+			<run>
+				VirtualAlarmPartition1.actionRequestPanicMode(lul_device, lul_settings.State)
+				return 4,0
+			</run>
+		</action>
+	</actionList>
+</implementation>
