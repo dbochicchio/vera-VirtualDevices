@@ -8,27 +8,36 @@ Partially based with permission on [Yeelight-Vera](https://github.com/toggledbit
 
 # Installation via MiOS App Store
 The files are available via MiOS App Store. Plug-in ID is 9281 if you want to install it manually.
+
 Go to your Vera web interface, then Apps, Install Apps and search for "Virtual HTTP Light Devices (Switch, Dimmer, RGB)". Click Details, then Install.
 
 # Manual Installation
 To install, simply upload the files in this directory (except readme) using Vera's feature (Go to *Apps*, then *Develop Apps*, then *Luup files* and select *Upload*) and then create a new device under Vera.
-App Store is recommended.
+App Store is recommended for stable version, but you'll find new features on GitHub first.
 
 # Async HTTP support (version 1.5+)
 Version 1.5 introduced support for async HTTP calls. This will make your device faster, because it's not blocking until the HTTP call is completed.
 This is supported out of the box on openLuup.
+
 Just download [this file](https://github.com/akbooer/openLuup/blob/master/openLuup/http_async.lua) if you're running this plug-in on Vera, and copy it with the plug-in files.
+
 Async HTTP is strongly recommended. The plug-in will automatically detect it and use it if present, unless curl commands are specified.
 
 # Async update of device's status
 Version 2.0 introduced support for async updates of device's commands.
+
 If you want to automatically acknowledge the command, simply return a status code from 200 (included) to 400 (excluded). That's what devices will do anyway.
+
+
 If you want to control the result, simply return a different status code (ie 112) and then update the variable on your own via Vera/openLuup HTTP interface.
+
 This is useful if you have an API that supports retry logic and you want to reflect the real status of the external devices.
+
 This features doesn't work with curl commands.
 
 # curl support (version 2.1+)
 Starting from version 2.1, curl commands are supported. This means you can send POST/PUT/whatever calls you need, send cookies, headers and much more. [Please refer to curl manual for syntax](https://curl.haxx.se/docs/manual.html).
+
 All commands are supportting this new syntax, but it's not automatically applied unless you'll need it.
 
 Here's an example of POSTing to a form (this should be set in the corresponding command variables):
@@ -46,7 +55,9 @@ Be sure to start your command URL with *curl://*, then write your curl arguments
 
 # Create a new device
 To create a new device, got to Apps, then Develops, then Create device.
+
 Every time you want a new virtual device, just repeat this operation.
+
 This plug-ins support different kind of virtual devices, so choose the one you want to use and follow this guide.
 
 ### Switches, Lights, Garage Doors
@@ -97,7 +108,9 @@ The device will be automatically configured to category 2, subcategory 4 (RGB).
 - Upnp Implementation Filename/Implementation file: *I_VirtualHeater1.xml*
 
 The device will emulate a basic Heater, and turn on or off the associated device, translating this actions to a virtual thermostat handler.
+
 Temperature setpoints are supported, but only as cosmetic feature. Experimental setpoints support is added.
+
 External temperature sensor can be specified with *urn:bochicchio-com:serviceId:VirtualHeater1*/*TemperatureDevice*. If specified, the thermostat will copy its temperature from an external device. If omitted, you can update the corresponding variable of the thermostat using HTTP call or LUA code.
 
 ### Sensors (Door, Leak, Motion, Smoke, CO, Glass Break, Freeze or Binary Sensor)
@@ -116,11 +129,14 @@ External temperature sensor can be specified with *urn:bochicchio-com:serviceId:
 - Upnp Implementation Filename/Implementation file: *I_VirtualGenericSensor1.xml*
 
 Subcategory number must be changed manually as [reported here](http://wiki.micasaverde.com/index.php/Luup_Device_Categories).
+
 Some categories shares the device file, and a JSON implementation must be manually specified, according to the previous table. It's usually possibile after a reload. Another reaload is necessary after the JSON file is changed.
+
 Support for master devices is not ready yet.
 
 ### Other sensors: Temperature, Humidity, UV, Generic Sensor
 Generic level sensor, such as temperature, humidity, UV and the generic sensor itself, doesn't need a specific plug-in to work as a virtual device, because no actions are executed by those devices.
+
 You can set the corresponding variables via HTTP and create the logic corresponding to the changes in your Luup environement (code, scenes, etc).
 
 Here's an example for a virtual temperature device:
@@ -182,21 +198,29 @@ This device will not perform any action, but just receive input from an external
 
 ### Configuration
 All devices are auto-configuring. At its first run, the code will create all the variables and set the category/sub_category numbers, for optimal compatibility. 
+
 To configure a virtual device, just enter its details, then go to Advanced and select Variables tab.
+
 In order to configure a device, you must specify its remote HTTP endpoints. Those vary depending on the device capabilities, so search for the corresponding API. As with any HTTP device, a static IP is recommended. Check your device or router for instruction on how to do that.
 
 ### Master Devices vs legacy mode (version 2.0+)
 If you're running the plug-in on openLuup, chooosing between an indipendent device (legacy mode) configuration or a master/children configuration doesn't really matter.
+
 On Vera luup engine, instead, a master/children configuration will save memory (this could be a lot of memory, depending on how many devices you have).
+
 If you've already created your devices with a previous version, choose one as the master (it doesn't matter which one), and get its ID. Be sure to use the new D_Virtual*.xml files as device_json.
+
 Go to every device you want to adopt as children, and
  - change *device_json* to the new *D_Virtual*.xml* version
  - remove *impl_file* attribute (it's not used) on children
  - set *id_parent* to your master ID
 
 Do a *luup.reload()* and you should be good to go.
+
 This procedure is similar if you want to create new children for a given master.
+
 There's no limit to how many children a master could handle.
+
 It's suggested to have one master per controller and how many children you want.
 
 #### Switch On/Off (All)
@@ -249,10 +273,10 @@ For a custom device: ```http://mydevice/setwhitemode?v=%s```
 The %s parameter will be replace with temperature (from 2000 to 6500 k). Leave 'http://' if not supported.
 
 #### Sensors
-Set *SetTrippedURL* variable to the corresponding HTTP call (to trip).
-Set *SetUnTrippedURL* variable to the corresponding HTTP call (to untrip).
-Set *SetArmedURL* variable to the corresponding HTTP call (to arm).
-Set *SetUnArmedURL* variable to the corresponding HTTP call (to disarm).
+- Set *SetTrippedURL* variable to the corresponding HTTP call (to trip).
+- Set *SetUnTrippedURL* variable to the corresponding HTTP call (to untrip).
+- Set *SetArmedURL* variable to the corresponding HTTP call (to arm).
+- Set *SetUnArmedURL* variable to the corresponding HTTP call (to disarm).
 
 For a custom device: ```http://mydevice/tripped?v=%s```
 
