@@ -119,8 +119,8 @@ External temperature sensor can be specified with *urn:bochicchio-com:serviceId:
 	|Door sensor|*D_DoorSensor1.xml*|*D_DoorSensor1.json*|4|1|
 	|Leak sensor|*D_LeakSensor1.xml*|*D_LeakSensor1.json*|4|2|
 	|Motion sensor|*D_MotionSensor1.xml*|*D_MotionSensor1.json* or *D_MotionSensorWithTamper1.json* |4|3|
-	|Smoke sensor|*D_SmokeSensor1.xml*|*D_SmokeCoSensor1.json* or *D_SmokeSensor1.json* or ÈD_SmokeSensorWithTamper1.json*|4|4|
-	|CO sensor||*D_SmokeSensor1.xml*|*D_COSensor1.json*or *D_SmokeCoSensor1.json*|4|5|
+	|Smoke sensor|*D_SmokeSensor1.xml*|*D_SmokeCoSensor1.json* or *D_SmokeSensor1.json* or *D_SmokeSensorWithTamper1.json*|4|4|
+	|CO sensor|*D_SmokeSensor1.xml*|*D_COSensor1.json*or *D_SmokeCoSensor1.json*|4|5|
 	|Glass Break|*D_MotionSensor1.xml*|*D_GlassBreakSensor.json* or *D_GlassBreakSensorWithTamper.json*|4|6|
 	|Freeze Break|*D_FreezeSensor1.xml*|*D_FreezeSensor1.json*|4|7|
 	|Binary sensor (not really implemented)|*D_MotionSensor1.xml*|*D_MotionSensor1.json*|4|8|
@@ -129,7 +129,7 @@ External temperature sensor can be specified with *urn:bochicchio-com:serviceId:
 
 Subcategory number must be changed manually as [reported here](http://wiki.micasaverde.com/index.php/Luup_Device_Categories).
 
-Some categories shares the device file, and a JSON implementation must be manually specified, according to the previous table. It's usually possibile after a reload. Another reaload is necessary after the JSON file is changed.
+Some categories share the device file, and a JSON implementation must be manually specified, according to the previous table. It's usually possibile after a reload. Another reaload is necessary after the JSON file is changed.
 
 Support for master devices is not ready yet.
 
