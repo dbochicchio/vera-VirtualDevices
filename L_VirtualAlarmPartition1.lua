@@ -1,7 +1,7 @@
 module("L_VirtualAlarmPartition1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualAlarmPartition"
-local _PLUGIN_VERSION = "2.1.0"
+local _PLUGIN_VERSION = "2.1.1"
 
 local debugMode = false
 
@@ -302,7 +302,6 @@ function actionRequestArmMode(devNum, state, pinCode)
 	-- send command
 	sendDeviceCommand(COMMANDS_ARM, {state or "Disarmed", pinCode or ""}, devNum, function()
 		local simpleState = state ~= "Disarmed" and "Armed" or "Disarmed"
-		setVerboseDisplay(devNum, string.format('State: %s%s', simpleState, simpleState == "Disarmed" and "" or (" (" .. state .. ")")))
 		setVar(ALARMSID, "ArmMode", simpleState, devNum)
 		setVar(ALARMSID, "DetailedArmMode", state, devNum)
 	end)
@@ -326,7 +325,7 @@ function sensorWatch(devNum, sid, var, oldVal, newVal)
 	if sid == ALARMSID then
 		if var == "Alarm" and (newVal or false) == true then
 			setVerboseDisplay(devNum, nil, 'Alarm: triggered')
-		elseif var == "VendorStatus" or var == "LastUser" then
+		elseif var == "VendorStatus" or var == "LastUser" or var == "DetailedArmMode" then
 			updateStatus(devNum)
 		end
 	end
@@ -335,7 +334,12 @@ end
 function updateStatus(devNum)
 	local vendorStatus = getVar(ALARMSID, "VendorStatus", "", devNum)
 	local lastUser = getVar(ALARMSID, "LastUser", "", devNum)
-	setVerboseDisplay(devNum, nil, string.format('Status: %s - %s', vendorStatus, lastUser))
+	local state = getVar(ALARMSID, "DetailedArmMode", "", devNum)
+	local simpleState = state ~= "Disarmed" and "Armed" or "Disarmed"
+
+	setVerboseDisplay(devNum, 
+						string.format('Status: %s%s', simpleState, simpleState == "Disarmed" and "" or (" (" .. state .. ")")),
+						string.format('%s - %s', vendorStatus, lastUser))
 end
 
 function startPlugin(devNum)
@@ -375,6 +379,7 @@ function startPlugin(devNum)
 		luup.variable_watch("AlarmSensorWatch", ALARMSID, "Alarm", deviceID)
 		luup.variable_watch("AlarmSensorWatch", ALARMSID, "LastUser", deviceID)
 		luup.variable_watch("AlarmSensorWatch", ALARMSID, "VendorStatus", deviceID)
+		luup.variable_watch("AlarmSensorWatch", ALARMSID, "DetailedArmMode", deviceID)
 
 		-- status
 		luup.set_failure(0, deviceID)

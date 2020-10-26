@@ -1,7 +1,7 @@
 module("L_VirtualDoorLock1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualDoorLock"
-local _PLUGIN_VERSION = "2.1.0"
+local _PLUGIN_VERSION = "2.1.1"
 
 local debugMode = false
 
@@ -312,6 +312,7 @@ function virtualDoorLockWatchSync(devNum, sid, var, oldVal, newVal)
 			local masterID = getVarNumeric(MYSID, "DoorLockDeviceID", 0, devNum)
 			if masterID > 0 then
 				local v = tostring(newVal or "0") == "0" and "1" or "0"
+				D(devNum, "virtualDoorLockWatchSync: #%1 - Master: #%2 - Status: %3", devNum, masterID, v)
 				setVar(LOCKSID, "Status", v, masterID)
 				setVar(SWITCHSID, "Status", v, masterID)
 			end
@@ -330,10 +331,6 @@ function startPlugin(devNum)
 		-- generic init
 		initVar(MYSID, "DebugMode", 0, deviceID)
 
-		-- sensors init
-		--initVar(SECURITYSID, "Armed", "0", deviceID)
-		--initVar(SECURITYSID, "Tripped", "0", deviceID)
-
 		-- http calls init
 		initVar(MYSID, COMMANDS_LOCK, DEFAULT_ENDPOINT, deviceID)
 		initVar(MYSID, COMMANDS_UNLOCK, DEFAULT_ENDPOINT, deviceID)
@@ -341,7 +338,7 @@ function startPlugin(devNum)
 		-- set at first run, then make it configurable
 		if luup.attr_get("category_num", deviceID) == nil then
 			local category_num = 7
-			luup.attr_set("category_num", category_num, deviceID) -- security sensor
+			luup.attr_set("category_num", category_num, deviceID)
 		end
 
 		-- watches
@@ -350,7 +347,7 @@ function startPlugin(devNum)
 		if sensorDeviceID > 0 then
 			local currentStatus = getVarNumeric(SECURITYSID, "Tripped", 0, sensorDeviceID)
 			D(deviceID, "Sensor startup sync: %1 - #%2", currentStatus, sensorDeviceID)
-			setVar(LOCKSID, "Status", currentStatus, deviceID)
+			setVar(LOCKSID, "Status", currentStatus == 0 and "1" or "0", deviceID)
 			setVar(MYSID, "DoorLockDeviceID", deviceID, sensorDeviceID) -- save door lock ID in the device sensor, to handle callbacks
 
 			luup.variable_watch("virtualDoorLockWatchSync", SECURITYSID, "Tripped", sensorDeviceID)

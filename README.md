@@ -170,6 +170,8 @@ This could be used with Vera's/openLuup's devices (switch+sensor) to combine int
 
 This is standard alarm partition, implementing *urn:schemas-micasaverde-com:service:AlarmPartition:2*.
 
+A simplified template files (no actions on UI) is offered via *D_VirtualAlarmPartition2.json*, if you just want to mirror your alarm's status with no actions on the UI.
+
 #### Commands
  - RequestArmMode: State (see DetailedArmMode variable), PINCode
  - RequestQuickArmMode: State (see DetailedArmMode variable)

@@ -80,13 +80,22 @@
 					"id": "1",
 					"type": "info",
 					"scenegroup": "1"
-				},
-				{
-					"id": "2",
-					"scenegroup": "2"
 				}
 			],
 			"Control": [
+				{
+					"ControlType": "label",
+					"Label": {
+						"lang_tag": "vendor_options",
+						"text": "Status"
+					},
+					"Display": {
+						"Top": 10,
+						"Left": 50,
+						"Width": 200,
+						"Height": 20
+					}
+				},
 				{
 					"ControlGroup": "1",
 					"ControlHeader": "1",
@@ -96,7 +105,7 @@
 					"Display": {
 						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
 						"Variable": "DetailedArmMode",
-						"Top": 10,
+						"Top": 30,
 						"Left": 50,
 						"Width": 200,
 						"Height": 20
@@ -111,7 +120,7 @@
 					"Display": {
 						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
 						"Variable": "VendorStatus",
-						"Top": 25,
+						"Top": 50,
 						"Left": 50,
 						"Width": 200,
 						"Height": 20
@@ -126,323 +135,10 @@
 					"Display": {
 						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
 						"Variable": "LastUser",
-						"Top": 40,
+						"Top": 70,
 						"Left": 50,
 						"Width": 200,
 						"Height": 20
-					}
-				},
-				{
-					"ControlType": "label",
-					"x": "2",
-					"Label": {
-						"lang_tag": "device_settings_page",
-						"text": "Arming Options"
-					},
-					"Display": {
-						"Top": 60,
-						"Left": 50,
-						"Width": 200,
-						"Height": 20
-					}
-				},
-				{
-					"ControlGroup": "2",
-					"ControlPair": "1",
-					"ControlType": "input",
-					"ID": "PINCode",
-					"Style": "numeric",
-					"Display": {
-						"Top": 80,
-						"Left": 50,
-						"Width": 80,
-						"Height": 20
-					}
-				},
-				{
-					"ControlGroup": "2",
-					"ControlPair": "1",
-					"ControlType": "button",
-					"left": "0",
-					"top": "1",
-					"Label": {
-						"lang_tag": "cmd_set",
-						"text": "Arm"
-					},
-					"Display": {
-						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
-						"Variable": "DetailedArmMode",
-						"Value": "Armed",
-						"Top": 80,
-						"Left": 140,
-						"Width": 75,
-						"Height": 20
-					},
-					"Command": {
-						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
-						"Action": "RequestArmMode",
-						"Parameters": [
-							{
-								"Name": "State",
-								"Value": "Armed"
-							},
-							{
-								"Name": "PINCode",
-								"ID": "PINCode"
-							}
-						]
-					}
-				},
-				{
-					"ControlGroup": "2",
-					"ControlPair": "1",
-					"ControlType": "button",
-					"left": "1",
-					"top": "1",
-					"Label": {
-						"lang_tag": "cmd_set",
-						"text": "Stay"
-					},
-					"Display": {
-						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
-						"Variable": "DetailedArmMode",
-						"Value": "Stay",
-						"Top": 80,
-						"Left": 225,
-						"Width": 75,
-						"Height": 20
-					},
-					"Command": {
-						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
-						"Action": "RequestArmMode",
-						"Parameters": [
-							{
-								"Name": "State",
-								"Value": "Stay"
-							},
-							{
-								"Name": "PINCode",
-								"ID": "PINCode"
-							}
-						]
-					}
-				},
-				{
-					"ControlGroup": "2",
-					"ControlPair": "1",
-					"ControlType": "button",
-					"left": "0",
-					"top": "2",
-					"Label": {
-						"lang_tag": "cmd_set",
-						"text": "Force"
-					},
-					"Display": {
-						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
-						"Variable": "DetailedArmMode",
-						"Value": "Force",
-						"Top": 104,
-						"Left": 140,
-						"Width": 75,
-						"Height": 20
-					},
-					"Command": {
-						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
-						"Action": "RequestArmMode",
-						"Parameters": [
-							{
-								"Name": "State",
-								"Value": "Force"
-							},
-							{
-								"Name": "PINCode",
-								"ID": "PINCode"
-							}
-						]
-					}
-				},
-				{
-					"ControlGroup": "2",
-					"ControlPair": "1",
-					"ControlType": "button",
-					"left": "1",
-					"top": "2",
-					"Label": {
-						"lang_tag": "cmd_set",
-						"text": "Disarm"
-					},
-					"Display": {
-						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
-						"Variable": "DetailedArmMode",
-						"Value": "Disarmed",
-						"Top": 104,
-						"Left": 225,
-						"Width": 75,
-						"Height": 20
-					},
-					"Command": {
-						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
-						"Action": "RequestArmMode",
-						"Parameters": [
-							{
-								"Name": "State",
-								"Value": "Disarmed"
-							},
-							{
-								"Name": "PINCode",
-								"ID": "PINCode"
-							}
-						]
-					}
-				},
-				{
-					"ControlGroup": "2",
-					"ControlPair": "1",
-					"ControlType": "button",
-					"left": "1",
-					"top": "2",
-					"Label": {
-						"lang_tag": "cmd_set",
-						"text": "Night"
-					},
-					"Display": {
-						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
-						"Variable": "DetailedArmMode",
-						"Value": "Night",
-						"Top": 130,
-						"Left": 140,
-						"Width": 75,
-						"Height": 20
-					},
-					"Command": {
-						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
-						"Action": "RequestArmMode",
-						"Parameters": [
-							{
-								"Name": "State",
-								"Value": "Night"
-							},
-							{
-								"Name": "PINCode",
-								"ID": "PINCode"
-							}
-						]
-					}
-				},
-				{
-					"ControlGroup": "2",
-					"ControlPair": "1",
-					"ControlType": "button",
-					"left": "1",
-					"top": "2",
-					"Label": {
-						"lang_tag": "cmd_set",
-						"text": "Vacation"
-					},
-					"Display": {
-						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
-						"Variable": "DetailedArmMode",
-						"Value": "Vacation",
-						"Top": 130,
-						"Left": 225,
-						"Width": 75,
-						"Height": 20
-					},
-					"Command": {
-						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
-						"Action": "RequestArmMode",
-						"Parameters": [
-							{
-								"Name": "State",
-								"Value": "Vacation"
-							},
-							{
-								"Name": "PINCode",
-								"ID": "PINCode"
-							}
-						]
-					}
-				},
-				{
-					"ControlType": "label",
-					"Label": {
-						"lang_tag": "device_settings_page",
-						"text": "Panic Alarm Options"
-					},
-					"Display": {
-						"Top": 160,
-						"Left": 50,
-						"Width": 200,
-						"Height": 20
-					}
-				},
-				{
-					"ControlType": "button",
-					"Label": {
-						"lang_tag": "cmd_set",
-						"text": "Police"
-					},
-					"Display": {
-						"Top": 180,
-						"Left": 50,
-						"Width": 75,
-						"Height": 20
-					},
-					"Command": {
-						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
-						"Action": "RequestPanicMode",
-						"Parameters": [
-							{
-								"Name": "State",
-								"Value": "Police"
-							}
-						]
-					}
-				},
-				{
-					"ControlType": "button",
-					"Label": {
-						"lang_tag": "cmd_set",
-						"text": "Medical"
-					},
-					"Display": {
-						"Top": 180,
-						"Left": 135,
-						"Width": 75,
-						"Height": 20
-					},
-					"Command": {
-						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
-						"Action": "RequestPanicMode",
-						"Parameters": [
-							{
-								"Name": "State",
-								"Value": "Medical"
-							}
-						]
-					}
-				},
-				{
-					"ControlType": "button",
-					"Label": {
-						"lang_tag": "cmd_set",
-						"text": "Fire"
-					},
-					"Display": {
-						"Top": 180,
-						"Left": 220,
-						"Width": 75,
-						"Height": 20
-					},
-					"Command": {
-						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
-						"Action": "RequestPanicMode",
-						"Parameters": [
-							{
-								"Name": "State",
-								"Value": "Fire"
-							}
-						]
 					}
 				},
 				{
@@ -452,7 +148,7 @@
 						"text": "Vendor Options"
 					},
 					"Display": {
-						"Top": 220,
+						"Top": 100,
 						"Left": 50,
 						"Width": 200,
 						"Height": 20
@@ -463,7 +159,7 @@
 					"Display": {
 						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
 						"Variable": "VendorStatus",
-						"Top": 240,
+						"Top": 120,
 						"Left": 50,
 						"Width": 200,
 						"Height": 20
@@ -474,7 +170,7 @@
 					"Display": {
 						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
 						"Variable": "VendorStatusCode",
-						"Top": 260,
+						"Top": 140,
 						"Left": 50,
 						"Width": 200,
 						"Height": 20
@@ -485,7 +181,7 @@
 					"Display": {
 						"Service": "urn:micasaverde-com:serviceId:AlarmPartition2",
 						"Variable": "VendorStatusData",
-						"Top": 280,
+						"Top": 160,
 						"Left": 50,
 						"Width": 200,
 						"Height": 20
@@ -495,13 +191,13 @@
 		},
 		{
 			"Label": {
-				"lang_tag": "ui7_settings",
-				"text": "Settings"
+				"lang_tag": "ui7_advanced",
+				"text": "Advanced"
 			},
-			"Position": "1",
+			"Position": "2",
 			"TabType": "javascript",
 			"ScriptName": "shared.js",
-			"Function": "simple_device"
+			"Function": "advanced_device"
 		},
 		{
 			"Label": {
