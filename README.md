@@ -134,7 +134,7 @@ Some categories shares the device file, and a JSON implementation must be manual
 Support for master devices is not ready yet.
 
 ### Other sensors: Temperature, Humidity, UV, Generic Sensor
-Generic level sensor, such as temperature, humidity, UV and the generic sensor itself, doesn't need a specific plug-in to work as a virtual device, because no actions are executed by those devices.
+Generic level sensor, such as temperature, humidity, UV and the generic sensor itself, don't need a specific plug-in to work as virtual devices, because no actions are executed by those devices.
 
 You can set the corresponding variables via HTTP and create the logic corresponding to the changes in your Luup environement (code, scenes, etc).
 
