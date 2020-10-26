@@ -120,7 +120,7 @@ External temperature sensor can be specified with *urn:bochicchio-com:serviceId:
 	|Leak sensor|*D_LeakSensor1.xml*|*D_LeakSensor1.json*|4|2|
 	|Motion sensor|*D_MotionSensor1.xml*|*D_MotionSensor1.json* or *D_MotionSensorWithTamper1.json* |4|3|
 	|Smoke sensor|*D_SmokeSensor1.xml*|*D_SmokeCoSensor1.json* or *D_SmokeSensor1.json* or *D_SmokeSensorWithTamper1.json*|4|4|
-	|CO sensor|*D_SmokeSensor1.xml*|*D_COSensor1.json*or *D_SmokeCoSensor1.json*|4|5|
+	|CO sensor|*D_SmokeSensor1.xml*|*D_COSensor1.json* or *D_SmokeCoSensor1.json*|4|5|
 	|Glass Break|*D_MotionSensor1.xml*|*D_GlassBreakSensor.json* or *D_GlassBreakSensorWithTamper.json*|4|6|
 	|Freeze Break|*D_FreezeSensor1.xml*|*D_FreezeSensor1.json*|4|7|
 	|Binary sensor (not really implemented)|*D_MotionSensor1.xml*|*D_MotionSensor1.json*|4|8|
@@ -214,7 +214,7 @@ If you've already created your devices with a previous version, choose one as th
 
 Go to every device you want to adopt as children, and
  - change *device_json* to the new *D_Virtual\*.xml* version
- - remove *impl_file* attribute (it's not used) on every children
+ - remove *impl_file* attribute (it's not used) on every child
  - set *id_parent* to your master ID
 
 Do a *luup.reload()* and you should be good to go.
