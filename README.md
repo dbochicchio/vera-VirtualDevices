@@ -213,13 +213,13 @@ On Vera luup engine, instead, a master/children configuration will save memory (
 If you've already created your devices with a previous version, choose one as the master (it doesn't matter which one), and get its ID. Be sure to use the new D_Virtual*.xml files as device_json.
 
 Go to every device you want to adopt as children, and
- - change *device_json* to the new *D_Virtual*.xml* version
- - remove *impl_file* attribute (it's not used) on children
+ - change *device_json* to the new *D_Virtual\*.xml* version
+ - remove *impl_file* attribute (it's not used) on every children
  - set *id_parent* to your master ID
 
 Do a *luup.reload()* and you should be good to go.
 
-This procedure is similar if you want to create new children for a given master.
+This procedure is similar if you want to create new child for a given master.
 
 There's no limit to how many children a master could handle.
 
