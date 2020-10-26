@@ -170,23 +170,24 @@ This could be used with Vera's/openLuup's devices (switch+sensor) to combine int
 
 This is standard alarm partition, implementing *urn:schemas-micasaverde-com:service:AlarmPartition:2*.
 
-A simplified template files (no actions on UI) is offered via *D_VirtualAlarmPartition2.json*, if you just want to mirror your alarm's status with no actions on the UI.
+A simplified device template file is offered via *D_VirtualAlarmPartition2.json*, if you just want to mirror your alarm's status with no actions on the UI.
+AltUI friendly, with two lines showing the status.
 
 #### Commands
- - RequestArmMode: State (see DetailedArmMode variable), PINCode
- - RequestQuickArmMode: State (see DetailedArmMode variable)
- - RequestPanicMode: State
+ - *RequestArmMode*: *State* (see *DetailedArmMode* variable), *PINCode*
+ - *RequestQuickArmMode*: *State* (see *DetailedArmMode* variable)
+ - *RequestPanicMode*: *State*
 
 #### Variables
-- DetailedArmMode: any of Armed, ArmedInstant, Stay, StayInstant, Night, NightInstant, Force, Ready, Vacation, NotReady, FailedToArm, EntryDelay, ExitDelay
-- ArmMode: Armed or Disarmed
-- Alarm: None or Active (alarm triggered)
-- AlarmMemory: boolean (true if alarm occurred, false if no alarm or cleared)
-- LastAlarmActive: last alarm as epoch
-- LastUser: last user who last initiated a command against the partition
-- VendorStatus: a custom status
-- VendorStatusCode: a custom code
-- VendorStatusData: custom data
+- *DetailedArmMode*: any of *Armed*, *ArmedInstant*, *Stay*, *StayInstant*, *Night*, *NightInstant*, *Force*, *Ready*, *Vacation*, *NotReady*, *FailedToArm*, *EntryDelay*, *ExitDelay*
+- *ArmMode*: *Armed* or *Disarmed*
+- *Alarm*: *None* or *Active* (alarm triggered)
+- *AlarmMemory*: boolean (true if alarm occurred, false if no alarm or cleared)
+- *LastAlarmActive*: last alarm as epoch
+- *LastUser*: last user who last initiated a command against the partition
+- *VendorStatus*: a custom status
+- *VendorStatusCode*: a custom code
+- *VendorStatusData*: custom data
 
 ### Scene Controllers (2.0+)
 - Upnp Device Filename/Device File (2.0+, master/children mode): *D_VirtualSceneController1.xml*
