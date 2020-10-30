@@ -210,10 +210,10 @@ If you're running the plug-in on openLuup, chooosing between an indipendent devi
 
 On Vera luup engine, instead, a master/children configuration will save memory (this could be a lot of memory, depending on how many devices you have).
 
-If you've already created your devices with a previous version, choose one as the master (it doesn't matter which one), and get its ID. Be sure to use the new D_Virtual*.xml files as device_json.
+If you've already created your devices with a previous version, choose one as the master (it doesn't matter which one), and get its ID. Be sure to use the new D_Virtual*.xml files as device_file parameter.
 
 Go to every device you want to adopt as children, and
- - change *device_json* to the new *D_Virtual\*.xml* version
+ - change *device_file* to the new *D_Virtual\*.xml* version
  - remove *impl_file* attribute (it's not used) on every child
  - set *id_parent* to your master ID
 
