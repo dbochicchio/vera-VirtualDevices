@@ -98,7 +98,7 @@ Many different devices could be mapped with this service.
 - Upnp Device Filename/Device File (legacy mode): *D_DimmableRGBLight1.xml*
 - Upnp Implementation Filename/Implementation file: *I_VirtualRGBW1.xml*
 
-If your light only supports RGB, please change variable *SupporteColor* to *R,G,B*. By default it's set to *W,D,R,G,B* to support white channels.
+If your light only supports RGB, please change variable *SupportedColor* to *R,G,B*. By default it's set to *W,D,R,G,B* to support white channels.
 The device will be automatically configured to category 2, subcategory 4 (RGB).
 
 ### Heaters
@@ -117,7 +117,7 @@ External temperature sensor can be specified with *urn:bochicchio-com:serviceId:
 	|Sensor Type|Filename|Device JSON|Category|Subcategory|
 	|---|---|---|---|---|
 	|Door sensor|*D_DoorSensor1.xml*|*D_DoorSensor1.json*|4|1|
-	|Leak sensor|*D_LeakSensor1.xml*|*D_LeakSensor1.json*|4|2|
+	|Leak sensor|*D_FloodSensor1.xml*|*D_FloodSensor1.json*|4|2|
 	|Motion sensor|*D_MotionSensor1.xml*|*D_MotionSensor1.json* or *D_MotionSensorWithTamper1.json* |4|3|
 	|Smoke sensor|*D_SmokeSensor1.xml*|*D_SmokeCoSensor1.json* or *D_SmokeSensor1.json* or *D_SmokeSensorWithTamper1.json*|4|4|
 	|CO sensor|*D_SmokeSensor1.xml*|*D_COSensor1.json* or *D_SmokeCoSensor1.json*|4|5|
@@ -128,6 +128,10 @@ External temperature sensor can be specified with *urn:bochicchio-com:serviceId:
 - Upnp Implementation Filename/Implementation file: *I_VirtualGenericSensor1.xml*
 
 Subcategory number must be changed manually as [reported here](http://wiki.micasaverde.com/index.php/Luup_Device_Categories).
+
+```
+luup.attr_set("subcategory_num", "2", deviceID)
+```
 
 Some categories share the device file, and a JSON implementation must be manually specified, according to the previous table. It's usually possibile after a reload. Another reaload is necessary after the JSON file is changed.
 
@@ -302,8 +306,7 @@ Your script should update the variables *Alarm*, *AlarmMemory*, *LastAlarmActive
 It's now possible to poll an endpoint and extract power consumption.
 - *SetUpdateMetersURL:* the URL to poll. For Shelly it's: ```http://mydevice/status```
 - *MeterUpdate*: how frequently you want to poll. 60 seconds by default.
-- *MeterPowerFormat*: the JSON (LUA) path to get the instant power. It's *"meters[1].power* for the first relay in a Shelly.
-- *MeterTotalFormat*: the JSON (LUA) path to get the total consumption. It's *"meters[1].total* for the first relay in a Shelly.
+- *MeterPowerFormat*: the JSON (LUA) path to get the instant power. It's *meters[1].power* for the first relay in a Shelly.
 
 ### Update your Vera/openLuup status
 This integration is useful when the Vera system is the primary and only controller for your remote lights.
