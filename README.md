@@ -52,6 +52,11 @@ curl://-d '{"key1":"value1", "key2":"value2"}' -H 'Content-Type: application/jso
 
 Be sure to start your command URL with *curl://*, then write your curl arguments. Be sure to test it via command line to be sure it'll work.
 
+# Multiple calls per action (version 2.2+)
+Starting from version 2.2, multiple calls per action could be specified. Just specifiy the commands in its own line.
+On openLuup or AltUI, use code to modify it (UI doesn't support multi-line values). Vera is OK.
+You can specify mixed commands (ie: curl or native HTTP calls).
+
 # Create a new device
 To create a new device, got to Apps, then Develops, then Create device.
 

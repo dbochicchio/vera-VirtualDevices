@@ -1,7 +1,7 @@
 module("L_VirtualRGBW1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualRGBW"
-local _PLUGIN_VERSION = "2.1.0"
+local _PLUGIN_VERSION = "2.2.0"
 
 local debugMode = false
 
@@ -125,6 +125,13 @@ local function split(str, sep)
 	return arr, #arr
 end
 
+local function trim(s)
+	if s == nil then return "" end
+	if type(s) ~= "string" then s = tostring(s) end
+	local from = s:match "^%s*()"
+	return from > #s and "" or s:match(".*%S", from)
+end
+
 -- Array to map, where f(elem) returns key[,value]
 local function map(arr, f, res)
 	res = res or {}
@@ -191,7 +198,7 @@ function httpGet(devNum, url, onSuccess)
 				return false, nil
 			end
 
-			local response_body = file:read('*all')
+			response_body = file:read('*all')
 			file:close()
 
 			D(devNum, "[HttpGet] %1 - %2", httpCmd, (response_body or ""))
@@ -261,7 +268,7 @@ end
 
 local function sendDeviceCommand(cmd, params, devNum, onSuccess)
 	D(devNum, "sendDeviceCommand(%1,%2,%3)", cmd, params, devNum)
-	
+
 	local pv = {}
 	if type(params) == "table" then
 		for k, v in ipairs(params) do
@@ -279,7 +286,15 @@ local function sendDeviceCommand(cmd, params, devNum, onSuccess)
 	local pstr = table.concat(pv, ",")
 
 	local cmdUrl = getVar(MYSID, cmd, DEFAULT_ENDPOINT, devNum)
-	if (cmdUrl ~= DEFAULT_ENDPOINT) then return httpGet(devNum, string.format(cmdUrl, pstr), onSuccess) end
+	if (cmdUrl ~= DEFAULT_ENDPOINT) then
+		local urls = split(cmdUrl, "\n")
+		for _, url in pairs(urls) do
+			D(devNum, "sendDeviceCommand.url(%1)", url)
+			if #trim(url) > 0 then
+				httpGet(devNum, string.format(url, pstr), onSuccess)
+			end
+		end
+	end
 
 	return false
 end
@@ -401,6 +416,8 @@ end
 function actionSetColor(devNum, newVal, sendToDevice)
 	D(devNum, "actionSetColor(%1,%2,%3)", devNum, newVal, sendToDevice)
 
+	newVal = newVal or ""
+
 	local status = getVarNumeric(SWITCHSID, "Status", 0, devNum)
 	local turnOnBeforeDim = getVarNumeric(DIMMERSID, "TurnOnBeforeDim", 0, devNum)
 	
@@ -412,17 +429,17 @@ function actionSetColor(devNum, newVal, sendToDevice)
 	end
 	local w, c, r, g, b
 
-	local s = split(newVal)
+	local s = split(newVal, ",")
 
-	if #newVal == 6 or #newVal == 7 then
+	if #s == 1 then
 		-- #RRGGBB or RRGGBB
 		local startIndex = #newVal == 7 and 2 or 1
-		r = tonumber(string.sub(newVal, startIndex, 2), 16)
-		g = tonumber(string.sub(newVal, startIndex+2, startIndex+3), 16)
-		b = tonumber(string.sub(newVal, startIndex+4, startIndex+5), 16)
+		r = tonumber(string.sub(newVal, startIndex, 2), 16) or 0
+		g = tonumber(string.sub(newVal, startIndex+2, startIndex+3), 16) or 0
+		b = tonumber(string.sub(newVal, startIndex+4, startIndex+5), 16) or 0
 		w, c = 0, 0
 		
-		D(devNum, "RGBFromHex(%1,%2,%3)", r, g, b)
+		D(devNum, "actionSetColor.RGBFromHex(%1,%2,%3)", r, g, b)
 
 		if r ~= nil and g  ~= nil and  b ~= nil and sendToDevice then
 			sendDeviceCommand(COMMANDS_SETRGBCOLOR, {r, g, b}, devNum, function()
@@ -437,7 +454,7 @@ function actionSetColor(devNum, newVal, sendToDevice)
 		g = tonumber(s[2]) or tonumber(string.sub(s[2], 2))
 		b = tonumber(s[3]) or tonumber(string.sub(s[3], 2))
 		w, c = 0, 0
-		D(devNum, "RGB(%1,%2,%3)", r, g, b)
+		D(devNum, "actionSetColor.RGB(%1,%2,%3)", r, g, b)
 		
 		if r ~= nil and g  ~= nil and  b ~= nil and sendToDevice then
 			sendDeviceCommand(COMMANDS_SETRGBCOLOR, {r, g, b}, devNum, function()
@@ -491,15 +508,15 @@ function actionSetColor(devNum, newVal, sendToDevice)
 				w = 0
 				--targetColor = string.format("D%d", c)
 			else
-				L(devNum, {
-					level = 1,
-					msg = "Unable to set color, target value %1 invalid"
-				}, newVal)
+				L(devNum, "Unable to set color, target value %1 invalid", newVal)
 				return
 			end
 		end
 
 		r, g, b = approximateRGB(temp)
+
+		D(devNum, "actionSetColor.whiteTemp(%1,%2,%3)", w, c, temp)
+
 		if sendToDevice then
 			sendDeviceCommand(COMMANDS_SETWHITETEMPERATURE, temp, devNum, function()
 				updateColor(devNum, w, c, r, g, b)

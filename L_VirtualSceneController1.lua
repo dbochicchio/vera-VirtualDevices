@@ -119,6 +119,14 @@ local function split(str, sep)
 	return arr, #arr
 end
 
+local function trim(s)
+	if s == nil then return "" end
+	if type(s) ~= "string" then s = tostring(s) end
+	local from = s:match "^%s*()"
+	return from > #s and "" or s:match(".*%S", from)
+end
+
+
 -- Array to map, where f(elem) returns key[,value]
 local function map(arr, f, res)
 	res = res or {}
@@ -192,7 +200,7 @@ function httpGet(devNum, url, onSuccess)
 				return false, nil
 			end
 
-			local response_body = file:read('*all')
+			response_body = file:read('*all')
 			file:close()
 
 			D(devNum, "[HttpGet] %1 - %2", httpCmd, (response_body or ""))

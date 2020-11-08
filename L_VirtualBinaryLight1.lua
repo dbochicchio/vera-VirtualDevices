@@ -126,6 +126,13 @@ local function split(str, sep)
 	return arr, #arr
 end
 
+local function trim(s)
+	if s == nil then return "" end
+	if type(s) ~= "string" then s = tostring(s) end
+	local from = s:match "^%s*()"
+	return from > #s and "" or s:match(".*%S", from)
+end
+
 -- Array to map, where f(elem) returns key[,value]
 local function map(arr, f, res)
 	res = res or {}
@@ -192,7 +199,7 @@ function httpGet(devNum, url, onSuccess)
 				return false, nil
 			end
 
-			local response_body = file:read('*all')
+			response_body = file:read('*all')
 			file:close()
 
 			D(devNum, "[HttpGet] %1 - %2", httpCmd, (response_body or ""))
@@ -200,7 +207,7 @@ function httpGet(devNum, url, onSuccess)
 
 			if onSuccess ~= nil then
 				D(devNum, "httpGet: onSuccess(%1)", status)
-				onSuccess(response_body)
+				onSuccess()
 			end
 			return true, response_body
 		end
@@ -225,7 +232,7 @@ function httpGet(devNum, url, onSuccess)
 
 			if onSuccess ~= nil and status >= 200 and status < 400 then
 				D(devNum, "httpGet: onSuccess(%1)", status)
-				onSuccess(table.concat(response_body or ""))
+				onSuccess()
 			end
 		end)
 
@@ -250,7 +257,7 @@ function httpGet(devNum, url, onSuccess)
 		if status >= 200 and status < 400 then
 			if onSuccess ~= nil then
 				D(devNum, "httpGet: onSuccess(%1)", status)
-				onSuccess(table.concat(response_body or ""))
+				onSuccess()
 			end
 
 			return true, tostring(table.concat(response_body or ""))
@@ -416,11 +423,13 @@ function actionStop(devNum) sendDeviceCommand(COMMANDS_MOVESTOP, nil, devNum) en
 function updateMeters(devNum)
 	function getValue(data, path)
 		D(devNum, "updateMeters.getValue(%1)", path)
-		local x = data
+		local x = data or ""
 		for field in path: gmatch "[^%.%[%]]+" do
-			x = x[tonumber(field) or field]
+			if x ~= nil and field ~= nil then
+				x = x[tonumber(field) or field]
+			end
 		end
-		return x
+		return x or ""
 	end
 
 	local kwhPath = getVar(MYSID, "MeterPowerFormat", "", devNum)
@@ -430,25 +439,27 @@ function updateMeters(devNum)
 
 	D(devNum, "updateMeters(%1)", url)
 
-	httpGet(devNum, url, function(response)
-		--response = '{"wifi_sta":{"connected":true,"ssid":"The Godfather","ip":"192.168.1.101","rssi":-49},"cloud":{"enabled":true,"connected":true},"mqtt":{"connected":false},"time":"18:29","unixtime":1602700175,"serial":2916,"has_update":false,"mac":"98F4ABF35BEC","cfg_changed_cnt":0,"actions_stats":{"skipped":0},"relays":[{"ison":false,"has_timer":false,"timer_started":0,"timer_duration":0,"timer_remaining":0,"overpower":false,"overtemperature":false,"is_valid":true,"source":"http"},{"ison":false,"has_timer":false,"timer_started":0,"timer_duration":0,"timer_remaining":0,"overpower":false,"overtemperature":false,"is_valid":true,"source":"http"}],"meters":[{"power":180.00,"overpower":0.00,"is_valid":true,"timestamp":1602700175,"counters":[0.000, 0.000, 0.000],"total":3696},{"power":0.00,"overpower":0.00,"is_valid":true,"timestamp":1602700175,"counters":[0.000, 0.000, 0.000],"total":6249}],"inputs":[{"input":0,"event":"","event_cnt":0},{"input":0,"event":"","event_cnt":0}],"temperature":54.69,"overtemperature":false,"tmp":{"tC":54.69,"tF":130.44, "is_valid":true},"update":{"status":"idle","has_update":false,"new_version":"20200827-065456/v1.8.3@4a8bc427","old_version":"20200827-065456/v1.8.3@4a8bc427"},"ram_total":49504,"ram_free":31480,"fs_size":233681,"fs_free":140811,"voltage":242.22,"uptime":4093887}'
-		D(devNum, "updateMeters: %1", response)
+	if cmdUrl ~= DEFAULT_ENDPOINT or (cmdUrl or "" ~= "") then
+		httpGet(devNum, url, function(response)
+			--response = '{"wifi_sta":{"connected":true,"ssid":"The Godfather","ip":"192.168.1.101","rssi":-49},"cloud":{"enabled":true,"connected":true},"mqtt":{"connected":false},"time":"18:29","unixtime":1602700175,"serial":2916,"has_update":false,"mac":"98F4ABF35BEC","cfg_changed_cnt":0,"actions_stats":{"skipped":0},"relays":[{"ison":false,"has_timer":false,"timer_started":0,"timer_duration":0,"timer_remaining":0,"overpower":false,"overtemperature":false,"is_valid":true,"source":"http"},{"ison":false,"has_timer":false,"timer_started":0,"timer_duration":0,"timer_remaining":0,"overpower":false,"overtemperature":false,"is_valid":true,"source":"http"}],"meters":[{"power":180.00,"overpower":0.00,"is_valid":true,"timestamp":1602700175,"counters":[0.000, 0.000, 0.000],"total":3696},{"power":0.00,"overpower":0.00,"is_valid":true,"timestamp":1602700175,"counters":[0.000, 0.000, 0.000],"total":6249}],"inputs":[{"input":0,"event":"","event_cnt":0},{"input":0,"event":"","event_cnt":0}],"temperature":54.69,"overtemperature":false,"tmp":{"tC":54.69,"tF":130.44, "is_valid":true},"update":{"status":"idle","has_update":false,"new_version":"20200827-065456/v1.8.3@4a8bc427","old_version":"20200827-065456/v1.8.3@4a8bc427"},"ram_total":49504,"ram_free":31480,"fs_size":233681,"fs_free":140811,"voltage":242.22,"uptime":4093887}'
+			D(devNum, "updateMeters: %1", response)
 
-		local json = require "dkjson"
-		local data = json.decode(response)
+			local json = require "dkjson"
+			local data = json.decode(response)
 
-		if kwhPath ~= "" then
-			local value = getValue(data, kwhPath)
-			D(devNum, "updateMeters - KWH %1", value)
-			setVar(ENERGYMETERSID, "KWH", value, devNum)
-		end
+			if kwhPath ~= "" then
+				local value = getValue(data, kwhPath)
+				D(devNum, "updateMeters - KWH %1", value)
+				setVar(ENERGYMETERSID, "KWH", value, devNum)
+			end
 
-		if wattsPath ~= "" then
-			local value = getValue(data, wattsPath)
-			D(devNum, "updateMeters - Watts %1", value)
-			setVar(ENERGYMETERSID, "Watts", value, devNum)
-		end
-	end)
+			if wattsPath ~= "" then
+				local value = getValue(data, wattsPath)
+				D(devNum, "updateMeters - Watts %1", value)
+				setVar(ENERGYMETERSID, "Watts", value, devNum)
+			end
+		end)
+	end
 
 	L(devNum, "updateMeters: next call in %1 secs", meterUpdate)
 	luup.call_delay("updateMeters", meterUpdate, devNum)
