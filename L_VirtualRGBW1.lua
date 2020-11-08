@@ -431,7 +431,7 @@ function actionSetColor(devNum, newVal, sendToDevice)
 
 	local s = split(newVal, ",")
 
-	if #s == 1 then
+	if (#newVal == 6 or #newVal == 7) and #s == 1 then
 		-- #RRGGBB or RRGGBB
 		local startIndex = #newVal == 7 and 2 or 1
 		r = tonumber(string.sub(newVal, startIndex, 2), 16) or 0
