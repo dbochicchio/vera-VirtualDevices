@@ -54,7 +54,9 @@ Be sure to start your command URL with *curl://*, then write your curl arguments
 
 # Multiple calls per action (version 2.2+)
 Starting from version 2.2, multiple calls per action could be specified. Just specifiy the commands in its own line.
+
 On openLuup or AltUI, use code to modify it (UI doesn't support multi-line values). Vera is OK.
+
 You can specify mixed commands (ie: curl or native HTTP calls).
 
 # Create a new device
