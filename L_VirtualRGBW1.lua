@@ -1,12 +1,11 @@
 module("L_VirtualRGBW1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualRGBW"
-local _PLUGIN_VERSION = "2.2.0"
+local _PLUGIN_VERSION = "2.2.1"
 
 local debugMode = false
 
 local MYSID									= "urn:bochicchio-com:serviceId:VirtualRGBW1"
-local BULBTYPE								= "urn:schemas-upnp-org:device:DimmableRGBLight:1"
 local SWITCHSID								= "urn:upnp-org:serviceId:SwitchPower1"
 local DIMMERSID								= "urn:upnp-org:serviceId:Dimming1"
 local COLORSID								= "urn:micasaverde-com:serviceId:Color1"
@@ -467,7 +466,8 @@ function actionSetColor(devNum, newVal, sendToDevice)
 		-- Wnnn, Dnnn (color range)
 		local tempMin = getVarNumeric(MYSID, "MinTemperature", 1600, devNum)
 		local tempMax = getVarNumeric(MYSID, "MaxTemperature", 6500, devNum)
-		local code, temp = newVal:upper():match("([WD])(%d+)")
+		local filteredVal = newVal:gsub("W255", ""):gsub("D255", "") -- handle both
+		local code, temp = filteredVal:upper():match("([WD])(%d+)")
 		local t
 		if code == "W" then
 			t = tonumber(temp) or 128
