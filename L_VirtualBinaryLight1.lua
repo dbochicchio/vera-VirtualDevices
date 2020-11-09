@@ -1,7 +1,7 @@
 module("L_VirtualBinaryLight1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualBinaryLight"
-local _PLUGIN_VERSION = "2.1.0"
+local _PLUGIN_VERSION = "2.2.1"
 
 local debugMode = false
 
@@ -269,7 +269,7 @@ end
 
 local function sendDeviceCommand(cmd, params, devNum, onSuccess)
 	D(devNum, "sendDeviceCommand(%1,%2,%3)", cmd, params, devNum)
-	
+
 	local pv = {}
 	if type(params) == "table" then
 		for k, v in ipairs(params) do
@@ -287,7 +287,15 @@ local function sendDeviceCommand(cmd, params, devNum, onSuccess)
 	local pstr = table.concat(pv, ",")
 
 	local cmdUrl = getVar(MYSID, cmd, DEFAULT_ENDPOINT, devNum)
-	if (cmdUrl ~= DEFAULT_ENDPOINT) then return httpGet(devNum, string.format(cmdUrl, pstr), onSuccess) end
+	if (cmdUrl ~= DEFAULT_ENDPOINT) then
+		local urls = split(cmdUrl, "\n")
+		for _, url in pairs(urls) do
+			D(devNum, "sendDeviceCommand.url(%1)", url)
+			if #trim(url) > 0 then
+				httpGet(devNum, string.format(url, pstr), onSuccess)
+			end
+		end
+	end
 
 	return false
 end
