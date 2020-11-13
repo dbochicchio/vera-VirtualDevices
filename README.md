@@ -21,7 +21,7 @@ This is supported out of the box on openLuup.
 
 Just download [this file](https://github.com/akbooer/openLuup/blob/master/openLuup/http_async.lua) if you're running this plug-in on Vera, and copy it with the plug-in files.
 
-Async HTTP is strongly recommended. The plug-in will automatically detect it and use it if present, unless curl commands are specified.
+> **Remarks**: async HTTP is strongly recommended. The plug-in will automatically detect it and use it if present, unless curl commands are specified.
 
 # Async update of device's status
 Version 2.0 introduced support for async updates of device's commands.
@@ -32,7 +32,7 @@ If you want to control the result, simply return a different status code (ie 112
 
 This is useful if you have an API that supports retry logic and you want to reflect the real status of the external devices.
 
-This features doesn't work with curl commands.
+> **Remarks**: this feature doesn't work with curl commands.
 
 # curl support (version 2.1+)
 Starting from version 2.1, curl commands are supported. This means you can send POST/PUT/whatever calls you need, send cookies, headers and much more. [Please refer to curl manual for syntax](https://curl.haxx.se/docs/manual.html).
@@ -53,11 +53,13 @@ curl://-d '{"key1":"value1", "key2":"value2"}' -H 'Content-Type: application/jso
 Be sure to start your command URL with *curl://*, then write your curl arguments. Be sure to test it via command line to be sure it'll work.
 
 # Multiple calls per action (version 2.2+)
-Starting from version 2.2, multiple calls per action could be specified. Just specifiy the commands in its own line.
+Starting from version 2.2, multiple calls per action could be specified. Just specifiy each command in its own line.
 
 On openLuup or AltUI, use code to modify it (UI doesn't support multi-line values). Vera is OK.
 
 You can specify mixed commands (ie: curl or native HTTP calls).
+
+> Remarks: multiple commands will slow down your system. Do not exceed 3-4 commands per action. Async HTTP are strongly suggested, because they will not block the execution and nicely run in parallel.
 
 # Create a new device
 To create a new device, got to Apps, then Develops, then Create device.
@@ -85,7 +87,7 @@ Many different devices could be mapped with this service.
 |Relay|3|8|
 |Garage Door|32|8|
 
-[More info here.](http://wiki.micasaverde.com/index.php/Luup_Device_Categories)
+> **Remarks**: [More info are here.](http://wiki.micasaverde.com/index.php/Luup_Device_Categories)
 
 ### Dimmers
 - Upnp Device Filename/Device File (2.0+, master/children mode): *D_VirtualDimmableLight1.xml*
@@ -98,15 +100,15 @@ Many different devices could be mapped with this service.
 |Plugged|2|2|
 |In wall|3|3|
 
-[More info here.](http://wiki.micasaverde.com/index.php/Luup_Device_Categories)
+> **Remarks**: [More info are here.](http://wiki.micasaverde.com/index.php/Luup_Device_Categories)
 
 ### RGB(CCT) Lights
 - Upnp Device Filename/Device File (2.0+, master/children mode): *D_VirtualRGBW1.xml*
 - Upnp Device Filename/Device File (legacy mode): *D_DimmableRGBLight1.xml*
 - Upnp Implementation Filename/Implementation file: *I_VirtualRGBW1.xml*
 
-If your light only supports RGB, please change variable *SupportedColor* to *R,G,B*. By default it's set to *W,D,R,G,B* to support white channels.
-The device will be automatically configured to category 2, subcategory 4 (RGB).
+> **Remarks**: if your light only supports RGB, please change variable *SupportedColor* to *R,G,B*. By default it's set to *W,D,R,G,B* to support white channels.
+> The device will be automatically configured to category 2, subcategory 4 (RGB).
 
 ### Heaters
 - Upnp Device Filename/Device File (2.0+, master/children mode): *D_VirtualHeater1.xml*
@@ -117,7 +119,7 @@ The device will emulate a basic Heater, and turn on or off the associated device
 
 Temperature setpoints are supported, but only as cosmetic feature. Experimental setpoints support is added.
 
-External temperature sensor can be specified with *urn:bochicchio-com:serviceId:VirtualHeater1*/*TemperatureDevice*. If specified, the thermostat will copy its temperature from an external device. If omitted, you can update the corresponding variable of the thermostat using HTTP call or LUA code.
+> **Remarks**: An external temperature sensor could be specified with *urn:bochicchio-com:serviceId:VirtualHeater1*/*TemperatureDevice*. If specified, the thermostat will copy its temperature from an external device. If omitted, you can update the corresponding variable of the thermostat using HTTP call or LUA code.
 
 ### Sensors (Door, Leak, Motion, Smoke, CO, Glass Break, Freeze or Binary Sensor)
 - Upnp Device Filename/Device File:
@@ -140,7 +142,7 @@ Subcategory number must be changed manually as [reported here](http://wiki.micas
 luup.attr_set("subcategory_num", "2", deviceID)
 ```
 
-Some categories share the device file, and a JSON implementation must be manually specified, according to the previous table. It's usually possibile after a reload. Another reaload is necessary after the JSON file is changed.
+> **Remarks**: Some categories share the device file, and a JSON implementation must be manually specified, according to the previous table. It's usually possibile after a reload. Another reaload is necessary after the JSON file is changed.
 
 Support for master devices is not ready yet.
 
@@ -182,7 +184,7 @@ This could be used with Vera's/openLuup's devices (switch+sensor) to combine int
 This is standard alarm partition, implementing *urn:schemas-micasaverde-com:service:AlarmPartition:2*.
 
 A simplified device template file is offered via *D_VirtualAlarmPartition2.json*, if you just want to mirror your alarm's status with no actions on the UI.
-AltUI friendly, with two lines showing the status.
+This device file is AltUI friendly, with two lines showing the status.
 
 #### Commands
  - *RequestArmMode*: *State* (see *DetailedArmMode* variable), *PINCode*
@@ -207,7 +209,7 @@ AltUI friendly, with two lines showing the status.
 This defaults to 3 buttons with single, double, triple press support, but you can modify it. Look for [official doc](http://wiki.mios.com/index.php/Luup_UPnP_Variables_and_Actions#SceneController1) for more info.
 This device will not perform any action, but just receive input from an external device to simulate a scene controller, attached to scenes.
 
-**Attention**: due to the way scene controllers are implemented under openLuup, this device will not trigger scenes under this system.
+> **Attention**: due to the way scene controllers are implemented under openLuup, this device will not trigger scenes under this system.
 
 ### Configuration
 All devices are auto-configuring. At its first run, the code will create all the variables and set the category/sub_category numbers, for optimal compatibility. 
@@ -237,7 +239,8 @@ There's no limit to how many children a master could handle.
 It's suggested to have one master per controller and how many children you want.
 
 #### Switch On/Off (All)
-*Attention: do not include %20 in your URL, this will cause problems.*
+
+> **Attention: do not include %20 in your URL, this will cause problems.*
 
 To turn ON, set *SetPowerURL* variable to the corresponding HTTP call.
  - For Tasmota: ```http://mydevice/cm?cmnd=Power+On```
@@ -307,7 +310,7 @@ Set *SetRequestArmModeURL* variable to the corresponding HTTP call to change the
 Set *SetRequestPanicModeURL* variable to the corresponding HTTP call to request panic mode.
  - For a custom device: ```http://mydevice/alarm/panic?state=%s```
 
-Your script should update the variables *Alarm*, *AlarmMemory*, *LastAlarmActive*, *LastUser*, *VendorStatus*, *VendorStatusCode* and *VendorStatusData* if necessary, via standard LUUP HTTP call/code.
+Your script should update the variables *Alarm*, *AlarmMemory*, *LastAlarmActive*, *LastUser*, *VendorStatus*, *VendorStatusCode* and *VendorStatusData* if necessary, via standard luup HTTP call/code.
 
 ### Power consumption (Lights only, 2.1+)
 It's now possible to poll an endpoint and extract power consumption.
@@ -341,7 +344,7 @@ This can be called with a short URL like this:
 http://*veraip*:3480/data_request?id=lr_updateSwitch&device=214&status=0
 ```
 
-This handler is intended to turn a switch on/off, but can be adapted for other variables as well.
+> **Remarks**: this handler is intended to turn a switch on/off, but can be adapted for other variables as well.
 
 ### Ping device for status
 If you want to ping a device and have its status associated to the device, you can write a simple scene like this, to be executed every *x* minutes.
@@ -372,4 +375,4 @@ The devices are working and supported under openLuup and ALTUI. In this case, ju
 ### Support
 If you need more help, please post on Vera's forum and tag me (@therealdb).
 
-https://community.getvera.com/t/virtual-http-light-devices-supporting-rgb-ww-dimmers-switch-and-much-more-tasmota-esp-shelly/209297
+[Go to Vera forums.](https://community.getvera.com/t/virtual-http-light-devices-supporting-rgb-ww-dimmers-switch-and-much-more-tasmota-esp-shelly/209297)
