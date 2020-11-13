@@ -1,7 +1,7 @@
 module("L_VirtualBinaryLight1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualBinaryLight"
-local _PLUGIN_VERSION = "2.2.1"
+local _PLUGIN_VERSION = "2.2.2"
 
 local debugMode = false
 
@@ -207,7 +207,7 @@ function httpGet(devNum, url, onSuccess)
 
 			if onSuccess ~= nil then
 				D(devNum, "httpGet: onSuccess(%1)", status)
-				onSuccess()
+				onSuccess(response_body)
 			end
 			return true, response_body
 		end
@@ -232,7 +232,7 @@ function httpGet(devNum, url, onSuccess)
 
 			if onSuccess ~= nil and status >= 200 and status < 400 then
 				D(devNum, "httpGet: onSuccess(%1)", status)
-				onSuccess()
+				onSuccess(table.concat(response_body or ""))
 			end
 		end)
 
@@ -257,7 +257,7 @@ function httpGet(devNum, url, onSuccess)
 		if status >= 200 and status < 400 then
 			if onSuccess ~= nil then
 				D(devNum, "httpGet: onSuccess(%1)", status)
-				onSuccess()
+				onSuccess(table.concat(response_body or ""))
 			end
 
 			return true, tostring(table.concat(response_body or ""))
@@ -440,28 +440,35 @@ function updateMeters(devNum)
 		return x or ""
 	end
 
+	local meterUpdate = getVarNumeric(MYSID, "MeterUpdate", 0, devNum)
+
+	if meterUpdate == 0 then
+		L(devNum, "updateMeters: disabled")
+	end
+
 	local kwhPath = getVar(MYSID, "MeterPowerFormat", "", devNum)
 	local wattsPath = getVar(MYSID, "MeterTotalFormat", "", devNum)
-	local meterUpdate = getVarNumeric(MYSID, "MeterUpdate", 60, devNum)
+
 	local url = getVar(MYSID, COMMANDS_UPDATEMETERS, DEFAULT_ENDPOINT, devNum)
 
 	D(devNum, "updateMeters(%1)", url)
 
 	if cmdUrl ~= DEFAULT_ENDPOINT or (cmdUrl or "" ~= "") then
 		httpGet(devNum, url, function(response)
-			--response = '{"wifi_sta":{"connected":true,"ssid":"The Godfather","ip":"192.168.1.101","rssi":-49},"cloud":{"enabled":true,"connected":true},"mqtt":{"connected":false},"time":"18:29","unixtime":1602700175,"serial":2916,"has_update":false,"mac":"98F4ABF35BEC","cfg_changed_cnt":0,"actions_stats":{"skipped":0},"relays":[{"ison":false,"has_timer":false,"timer_started":0,"timer_duration":0,"timer_remaining":0,"overpower":false,"overtemperature":false,"is_valid":true,"source":"http"},{"ison":false,"has_timer":false,"timer_started":0,"timer_duration":0,"timer_remaining":0,"overpower":false,"overtemperature":false,"is_valid":true,"source":"http"}],"meters":[{"power":180.00,"overpower":0.00,"is_valid":true,"timestamp":1602700175,"counters":[0.000, 0.000, 0.000],"total":3696},{"power":0.00,"overpower":0.00,"is_valid":true,"timestamp":1602700175,"counters":[0.000, 0.000, 0.000],"total":6249}],"inputs":[{"input":0,"event":"","event_cnt":0},{"input":0,"event":"","event_cnt":0}],"temperature":54.69,"overtemperature":false,"tmp":{"tC":54.69,"tF":130.44, "is_valid":true},"update":{"status":"idle","has_update":false,"new_version":"20200827-065456/v1.8.3@4a8bc427","old_version":"20200827-065456/v1.8.3@4a8bc427"},"ram_total":49504,"ram_free":31480,"fs_size":233681,"fs_free":140811,"voltage":242.22,"uptime":4093887}'
 			D(devNum, "updateMeters: %1", response)
 
 			local json = require "dkjson"
 			local data = json.decode(response)
 
 			if kwhPath ~= "" then
+				D(devNum, "updateMeters - KWH Path %1", kwhPath)
 				local value = getValue(data, kwhPath)
 				D(devNum, "updateMeters - KWH %1", value)
 				setVar(ENERGYMETERSID, "KWH", value, devNum)
 			end
 
 			if wattsPath ~= "" then
+				D(devNum, "updateMeters - Watts Path %1", wattsPath)
 				local value = getValue(data, wattsPath)
 				D(devNum, "updateMeters - Watts %1", value)
 				setVar(ENERGYMETERSID, "Watts", value, devNum)
@@ -526,7 +533,7 @@ function startPlugin(devNum)
 		local commandUpdateMeters = initVar(MYSID, COMMANDS_UPDATEMETERS, DEFAULT_ENDPOINT, deviceID)
 		initVar(MYSID, "MeterPowerFormat", "meters[1].power", deviceID)
 		initVar(MYSID, "MeterTotalFormat", "meters[1].total", deviceID)
-		initVar(MYSID, "MeterUpdate", 60, deviceID)
+		initVar(MYSID, "MeterUpdate", 0, deviceID)
 
 		if commandUpdateMeters ~= DEFAULT_ENDPOINT then updateMeters(deviceID) end
 

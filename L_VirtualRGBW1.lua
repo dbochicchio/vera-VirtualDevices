@@ -1,7 +1,7 @@
 module("L_VirtualRGBW1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualRGBW"
-local _PLUGIN_VERSION = "2.2.1"
+local _PLUGIN_VERSION = "2.2.2"
 
 local debugMode = false
 
@@ -205,7 +205,7 @@ function httpGet(devNum, url, onSuccess)
 
 			if onSuccess ~= nil then
 				D(devNum, "httpGet: onSuccess(%1)", status)
-				onSuccess()
+				onSuccess(response_body)
 			end
 			return true, response_body
 		end
@@ -230,7 +230,7 @@ function httpGet(devNum, url, onSuccess)
 
 			if onSuccess ~= nil and status >= 200 and status < 400 then
 				D(devNum, "httpGet: onSuccess(%1)", status)
-				onSuccess()
+				onSuccess(table.concat(response_body or ""))
 			end
 		end)
 
@@ -255,7 +255,7 @@ function httpGet(devNum, url, onSuccess)
 		if status >= 200 and status < 400 then
 			if onSuccess ~= nil then
 				D(devNum, "httpGet: onSuccess(%1)", status)
-				onSuccess()
+				onSuccess(table.concat(response_body or ""))
 			end
 
 			return true, tostring(table.concat(response_body or ""))
@@ -447,11 +447,14 @@ function actionSetColor(devNum, newVal, sendToDevice)
 		end
 
 		restoreBrightness(devNum)
-	elseif #s == 3 then
+	elseif #s == 3 or #s == 5 then
 		-- R,G,B -- handle both 255,0,255 OR R255,G0,B255 value
-		r = tonumber(s[1]) or tonumber(string.sub(s[1], 2))
-		g = tonumber(s[2]) or tonumber(string.sub(s[2], 2))
-		b = tonumber(s[3]) or tonumber(string.sub(s[3], 2))
+		-- also handle W0,D0,R255,G0,B255
+
+		local startIndex = #s == 5 and 2 or 0
+		r = tonumber(s[startIndex+1]) or tonumber(string.sub(s[startIndex+1], 2))
+		g = tonumber(s[startIndex+2]) or tonumber(string.sub(s[startIndex+2], 2))
+		b = tonumber(s[startIndex+3]) or tonumber(string.sub(s[startIndex+3], 2))
 		w, c = 0, 0
 		D(devNum, "actionSetColor.RGB(%1,%2,%3)", r, g, b)
 		

@@ -1,7 +1,7 @@
 module("L_VirtualHeater1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualHeater"
-local _PLUGIN_VERSION = "2.2.1"
+local _PLUGIN_VERSION = "2.2.2"
 
 local debugMode = false
 
@@ -211,7 +211,7 @@ function httpGet(devNum, url, onSuccess)
 
 			if onSuccess ~= nil then
 				D(devNum, "httpGet: onSuccess(%1)", status)
-				onSuccess()
+				onSuccess(response_body)
 			end
 			return true, response_body
 		end
@@ -236,7 +236,7 @@ function httpGet(devNum, url, onSuccess)
 
 			if onSuccess ~= nil and status >= 200 and status < 400 then
 				D(devNum, "httpGet: onSuccess(%1)", status)
-				onSuccess()
+				onSuccess(table.concat(response_body or ""))
 			end
 		end)
 
@@ -261,7 +261,7 @@ function httpGet(devNum, url, onSuccess)
 		if status >= 200 and status < 400 then
 			if onSuccess ~= nil then
 				D(devNum, "httpGet: onSuccess(%1)", status)
-				onSuccess()
+				onSuccess(table.concat(response_body or ""))
 			end
 
 			return true, tostring(table.concat(response_body or ""))

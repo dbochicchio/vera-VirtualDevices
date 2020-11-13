@@ -9,10 +9,11 @@ Partially based with permission on [Yeelight-Vera](https://github.com/toggledbit
 # Installation via MiOS App Store
 The files are available via MiOS App Store. Plug-in ID is 9281 if you want to install it manually.
 
-Go to your Vera web interface, then Apps, Install Apps and search for "Virtual HTTP Light Devices (Switch, Dimmer, RGB)". Click Details, then Install.
+Go to your Vera web interface, then Apps, Install Apps and search for "Virtual HTTP Devices". Click Details, then Install.
 
 # Manual Installation
-To install, simply upload the files in this directory (except readme) using Vera's feature (Go to *Apps*, then *Develop Apps*, then *Luup files* and select *Upload*) and then create a new device under Vera.
+To install, simply upload the files in the release package, using Vera's feature (Go to *Apps*, then *Develop Apps*, then *Luup files* and select *Upload* - multiple files can be selected when uploading).
+To create a new device under Vera, go to *Apps*, then *Develop Apps* and *Create device*. See later for instructions on how to insert the values.
 App Store is recommended for stable version, but you'll find new features on GitHub first.
 
 # Async HTTP support (version 1.5+)
