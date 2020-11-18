@@ -162,7 +162,7 @@ Then update your device's with a call similar to this:
 http://*veraip*:3480/data_request?id=variableset&DeviceNum=6&serviceId=urn:upnp-org:serviceId:TemperatureSensor1&Variable=CurrentTemperature&Value=24.5
 ```
 
-See [docs](http://wiki.micasaverde.com/index.php/Luup_Devices) for more
+See [docs](http://wiki.micasaverde.com/index.php/Luup_Devices) for more.
 
 ### Window Covers/Roller Shutters/Blinds
 - Upnp Device Filename/Device File (2.0+, master/children mode): *D_VirtualWindowCovering1.xml*
@@ -266,7 +266,14 @@ If omitted (blank value or 'http://'), the device will try to change the status 
 Set *SetBrightnessURL* variable to the corresponding HTTP call.
 - For a custom device: ```http://mydevice/brigthness?v=%s```
 
-The %s parameter will be replace with the desired dimming (0/100). Leave 'http://' if not supported.
+The %s parameter will be replace with the desired dimming (0/100). Leave 'http://' or blank if not supported.
+
+##### Binary Window Covers/Roller Shutters/Blinds (2.2.3+)
+If you want to emulate a Window Cover/Roller Shutter/Blind but your device is supporting only ON/OFF commands, simply leave *SetBrightnessURL* to its default.
+
+Then go to the device's variable and set *BlindAsSwitch* to 1. The device will now work as follows:
+- when position is set on a value between 0 and 50, or down/close button is pressed, the switch off command is sent
+- when position is set on a value between 51 and 100, or up/open button is pressed, the switch off command is sent
 
 #### Color (RGB Lights)
 Set *SetRGBColorURL* variable to the corresponding HTTP call.
@@ -278,7 +285,7 @@ The %s parameter will be replace with the RBG color.
 Set *SetWhiteTemperatureURL* variable to the corresponding HTTP call.
  - For a custom device: ```http://mydevice/setwhitemode?v=%s```
 
-The %s parameter will be replace with temperature (from 2000 to 6500 k). Leave 'http://' if not supported.
+The %s parameter will be replace with temperature (from 2000 to 6500 k). Leave 'http://' or blank if not supported
 
 #### Sensors
 - Set *SetTrippedURL* variable to the corresponding HTTP call (to trip).

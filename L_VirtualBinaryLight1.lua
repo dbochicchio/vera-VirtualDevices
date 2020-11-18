@@ -1,7 +1,7 @@
 module("L_VirtualBinaryLight1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualBinaryLight"
-local _PLUGIN_VERSION = "2.2.2"
+local _PLUGIN_VERSION = "2.2.3"
 
 local debugMode = false
 
@@ -346,7 +346,7 @@ function actionPower(devNum, status)
 		sendDeviceCommand(COMMANDS_SETPOWER, "on", devNum, function()
 			setVar(SWITCHSID, "Status", status and "1" or "0", devNum)
 			
-			if isDimmer then
+			if isDimmer and not isBlind then
 				restoreBrightness(devNum)
 			end
 		end)
@@ -360,6 +360,7 @@ function actionBrightness(devNum, newVal)
 	local deviceType = luup.attr_get("device_file", devNum)
 	local isDimmer = deviceType == "D_DimmableLight1.xml" or deviceType == "D_VirtualDimmableLight1.xml" 
 	local isBlind = deviceType == "D_WindowCovering1.xml" or deviceType == "D_VirtualWindowCovering1.xml"
+	local noPosition = isBlind and getVarNumeric(MYSID, "BlindAsSwitch", 0, devNum) == 1
 
 	-- Dimming level change
 	newVal = math.floor(tonumber(newVal or 100))
@@ -370,6 +371,17 @@ function actionBrightness(devNum, newVal)
 		newVal = 100
 	end -- range
 
+	-- support for blind mapped as on/off only
+	if noPosition then
+		local newPosition = newVal<=50 and 0 or 100
+		D(devNum, "New Position: %1 - original %2", newPosition, newVal)
+
+		setVar(DIMMERSID, "LoadLevelStatus", newPosition, devNum)
+		setVar(DIMMERSID, "LoadLevelTarget", newPosition, devNum)
+		actionPower(devNum, newPosition == 0 and 0 or 1)
+	end
+
+	-- normal dimmer or blind
 	setVar(DIMMERSID, "LoadLevelTarget", newVal, devNum)
 
 	if newVal > 0 then
@@ -412,7 +424,7 @@ function actionToggleState(devNum)
 
 	if (cmdUrl == DEFAULT_ENDPOINT or cmdUrl == "") then
 		-- toggle by using the current status
-		actionPower(status == 1 and 0 or 1, devNum)
+		actionPower(devNum, status == 1 and 0 or 1)
 	else
 		-- update variables
 		setVar(SWITCHSID, "Target", status == 1 and 0 or 1, devNum)
@@ -511,6 +523,8 @@ function startPlugin(devNum)
 			initVar(DIMMERSID, "LoadLevelTarget", "0", deviceID)
 			initVar(DIMMERSID, "LoadLevelStatus", "0", deviceID)
 			initVar(DIMMERSID, "LoadLevelLast", "100", deviceID)
+			
+			initVar(MYSID, "BlindAsSwitch", 0, deviceID)
 
 			initVar(MYSID, COMMANDS_SETBRIGHTNESS, DEFAULT_ENDPOINT, deviceID)
 			initVar(MYSID, COMMANDS_MOVESTOP, DEFAULT_ENDPOINT, deviceID)

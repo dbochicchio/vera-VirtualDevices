@@ -1,7 +1,7 @@
 module("L_VirtualGenericSensor1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualGenericSensor"
-local _PLUGIN_VERSION = "2.2.2"
+local _PLUGIN_VERSION = "2.2.3"
 
 local debugMode = false
 
