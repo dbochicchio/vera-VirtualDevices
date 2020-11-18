@@ -108,7 +108,7 @@ Many different devices could be mapped with this service.
 - Upnp Device Filename/Device File (legacy mode): *D_DimmableRGBLight1.xml*
 - Upnp Implementation Filename/Implementation file: *I_VirtualRGBW1.xml*
 
-> **Remarks**: if your light only supports RGB, please change variable *SupportedColor* to *R,G,B*. By default it's set to *W,D,R,G,B* to support white channels.
+> **Remarks**: if your light only supports RGB, please change *SupportedColor* variable to *R,G,B*. By default it's set to *W,D,R,G,B* to support white channels.
 > The device will be automatically configured to category 2, subcategory 4 (RGB).
 
 ### Heaters
@@ -379,5 +379,10 @@ The devices are working and supported under openLuup and ALTUI. In this case, ju
 
 ### Support
 If you need more help, please post on Vera's forum and tag me (@therealdb).
+
+Before asking for support, please:
+ - change *DebugMode* variable to 1 (on the device itself, not on the master)
+ - repeat your problem and capture logs
+ - logs could be captured via SSH or by navigating to `http://VeraIP/cgi-bin/cmh/log.sh?Device=LuaUPnP`. [More Info](http://wiki.micasaverde.com/index.php/Logs)
 
 [Go to Vera forums.](https://community.getvera.com/t/virtual-http-light-devices-supporting-rgb-ww-dimmers-switch-and-much-more-tasmota-esp-shelly/209297)
