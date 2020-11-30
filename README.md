@@ -257,7 +257,7 @@ You can now specify an auto off timer (in seconds) to automatically turn off a l
 The corresponding variable is *AutoOff*.
 
 If you want to implement auto inching and you don't need to call the OFF endpoint, just specify `skip` as *SetPowerOffURL* variable.
-This will just update the status and no HTTP calls are made.
+This will just update the status and no HTTP calls will be made.
 
 #### Toggle (All)
 Set *SetToggleURL* variable to the corresponding HTTP call.
