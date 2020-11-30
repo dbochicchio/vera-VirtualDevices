@@ -251,9 +251,11 @@ To turn OFF, set *SetPowerOffURL* variable to the corresponding HTTP call.
 You can also specify only *SetPowerURL*, like this: ```http://mydevice/cm?cmnd=Power+%s```
 The %s parameter will be replace with On/Off (this very same case), based on the required action.
 
-### AutoOff (Dimmers, RGB lights, Window Covers/Roller Shutters/Blinds) (v 2.3+)
+#### AutoOff (Dimmers, RGB lights, Window Covers/Roller Shutters/Blinds) (v 2.3+)
 
 You can now specify an auto off timer (in seconds) to automatically turn off a light after a given amount of time.
+The corresponding variable is *AutoOff*.
+
 If you want to implement auto inching and you don't need to call the OFF endpoint, just specify `skip` as *SetPowerOffURL* variable.
 This will just update the status and no HTTP calls are made.
 
