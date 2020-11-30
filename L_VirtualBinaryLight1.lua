@@ -290,7 +290,8 @@ local function sendDeviceCommand(cmd, params, devNum, onSuccess)
 
 	-- SKIP command, just update variables
 	if (cmdUrl == "skip") then
-		onSuccess()
+		D(devNum, "sendDeviceCommand: skipped")
+		onSuccess("skip")
 		return true
 	end
 
@@ -363,7 +364,6 @@ function actionPowerInternal(devNum, status, shouldRestoreBrightness)
 			D(devNum, "Auto off in %1 secs", autoOff)
 
 			if autoOff>0 then
-				D(devNum, "Auto off in %1 secs", autoOff)
 				luup.call_delay("actionAutoOff", autoOff, devNum)
 			end
 		end)
@@ -371,8 +371,8 @@ function actionPowerInternal(devNum, status, shouldRestoreBrightness)
 end
 
 function actionAutoOff(devNum)
-	D(devNum, "Auto off called", autoOff)
-	actionPower(devNum, 0)
+	D(devNum, "Auto off called")
+	actionPower(tonumber(devNum), 0)
 end
 
 function actionPower(devNum, status)
