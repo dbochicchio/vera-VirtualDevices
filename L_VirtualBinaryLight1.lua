@@ -1,7 +1,7 @@
 module("L_VirtualBinaryLight1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualBinaryLight"
-local _PLUGIN_VERSION = "2.2.3"
+local _PLUGIN_VERSION = "2.3.0"
 
 local debugMode = false
 
@@ -287,6 +287,13 @@ local function sendDeviceCommand(cmd, params, devNum, onSuccess)
 	local pstr = table.concat(pv, ",")
 
 	local cmdUrl = getVar(MYSID, cmd, DEFAULT_ENDPOINT, devNum)
+
+	-- SKIP command, just update variables
+	if (cmdUrl == "skip") then
+		onSuccess()
+		return true
+	end
+
 	if (cmdUrl ~= DEFAULT_ENDPOINT) then
 		local urls = split(cmdUrl, "\n")
 		for _, url in pairs(urls) do
@@ -308,14 +315,12 @@ local function restoreBrightness(devNum)
 	if brightness > 0 and brightnessCurrent ~= brightness then
 		setVar(DIMMERSID, "LoadLevelTarget", brightness, devNum)	
 		sendDeviceCommand(COMMANDS_SETBRIGHTNESS, brightness, devNum, function()
-				setVar(DIMMERSID, "LoadLevelStatus", brightness, devNum)
+			setVar(DIMMERSID, "LoadLevelStatus", brightness, devNum)
 		end)
 	end
 end
 
-function actionPower(devNum, status)
-	D(devNum, "actionPower(%1,%2)", devNum, status)
-
+function actionPowerInternal(devNum, status, shouldRestoreBrightness)
 	-- Switch on/off
 	if type(status) == "string" then
 		status = (tonumber(status) or 0) ~= 0
@@ -323,34 +328,57 @@ function actionPower(devNum, status)
 		status = status ~= 0
 	end
 
-	-- dimmer or not?
+	D(devNum, "actionPowerInternal(%1,%2,%3)", devNum, status, shouldRestoreBrightness)
+
+	setVar(SWITCHSID, "Target", status and "1" or "0", devNum)
+
+	-- get device type
 	local deviceType = luup.attr_get("device_file", devNum)
 	local isDimmer = deviceType == "D_DimmableLight1.xml" or deviceType == "D_VirtualDimmableLight1.xml" 
 	local isBlind = deviceType == "D_WindowCovering1.xml" or deviceType == "D_VirtualWindowCovering1.xml"
 
-	setVar(SWITCHSID, "Target", status and "1" or "0", devNum)
-
 	-- UI needs LoadLevelTarget/Status to conform with status according to Vera's rules.
 	if not status then
+		if isDimmer or isBlind then
+			setVar(DIMMERSID, "LoadLevelTarget", 0, devNum)
+		end
+
+		sendDeviceCommand(COMMANDS_SETPOWEROFF, "off", devNum, function()
+			setVar(SWITCHSID, "Status", "0", devNum)
 			if isDimmer or isBlind then
-				setVar(DIMMERSID, "LoadLevelTarget", 0, devNum)
+				setVar(DIMMERSID, "LoadLevelStatus", 0, devNum)
 			end
-			
-			sendDeviceCommand(COMMANDS_SETPOWEROFF, "off", devNum, function()
-				setVar(SWITCHSID, "Status", status and "1" or "0", devNum)
-				if isDimmer or isBlind then
-					setVar(DIMMERSID, "LoadLevelStatus", 0, devNum)
-				end
-			end)
+		end)
 	else
 		sendDeviceCommand(COMMANDS_SETPOWER, "on", devNum, function()
-			setVar(SWITCHSID, "Status", status and "1" or "0", devNum)
+			setVar(SWITCHSID, "Status", "1", devNum)
 			
-			if isDimmer and not isBlind then
+			-- restore brightness
+			if shouldRestoreBrightness and isDimmer and not isBlind then
 				restoreBrightness(devNum)
+			end
+
+			-- autooff
+			local autoOff = getVarNumeric(MYSID, "AutoOff", 0, devNum)
+			D(devNum, "Auto off in %1 secs", autoOff)
+
+			if autoOff>0 then
+				D(devNum, "Auto off in %1 secs", autoOff)
+				luup.call_delay("actionAutoOff", autoOff, devNum)
 			end
 		end)
 	end
+end
+
+function actionAutoOff(devNum)
+	D(devNum, "Auto off called", autoOff)
+	actionPower(devNum, 0)
+end
+
+function actionPower(devNum, status)
+	D(devNum, "actionPower(%1,%2)", devNum, status)
+
+	actionPowerInternal(devNum, status, true)
 end
 
 function actionBrightness(devNum, newVal)
@@ -360,7 +388,7 @@ function actionBrightness(devNum, newVal)
 	local deviceType = luup.attr_get("device_file", devNum)
 	local isDimmer = deviceType == "D_DimmableLight1.xml" or deviceType == "D_VirtualDimmableLight1.xml" 
 	local isBlind = deviceType == "D_WindowCovering1.xml" or deviceType == "D_VirtualWindowCovering1.xml"
-	local noPosition = isBlind and getVarNumeric(MYSID, "BlindAsSwitch", 0, devNum) == 1
+	local isBlindNoPosition = isBlind and getVarNumeric(MYSID, "BlindAsSwitch", 0, devNum) == 1
 
 	-- Dimming level change
 	newVal = math.floor(tonumber(newVal or 100))
@@ -372,45 +400,38 @@ function actionBrightness(devNum, newVal)
 	end -- range
 
 	-- support for blind mapped as on/off only
-	if noPosition then
+	if isBlindNoPosition then
 		local newPosition = newVal<=50 and 0 or 100
 		D(devNum, "New Position: %1 - original %2", newPosition, newVal)
 
 		setVar(DIMMERSID, "LoadLevelStatus", newPosition, devNum)
 		setVar(DIMMERSID, "LoadLevelTarget", newPosition, devNum)
-		actionPower(devNum, newPosition == 0 and 0 or 1)
-	end
-
-	-- normal dimmer or blind
-	setVar(DIMMERSID, "LoadLevelTarget", newVal, devNum)
-
-	if newVal > 0 then
-		-- Level > 0, if light is off, turn it on.
-		if isDimmer then
-			local status = getVarNumeric(SWITCHSID, "Status", 0, devNum)
-			if status == 0 then
-				setVar(SWITCHSID, "Target", 1, devNum)	
-				sendDeviceCommand(COMMANDS_SETPOWER, "on", devNum, function()
-					setVar(SWITCHSID, "Status", 1, devNum)
-				end)
-			end
-		end
-
-		sendDeviceCommand(COMMANDS_SETBRIGHTNESS, newVal, devNum, function()
-			setVar(DIMMERSID, "LoadLevelStatus", newVal, devNum)
-		end)
-	elseif getVarNumeric(DIMMERSID, "AllowZeroLevel", 0, devNum) ~= 0 then
-		-- Level 0 allowed as on status, just go with it.
-		sendDeviceCommand(COMMANDS_SETBRIGHTNESS, {0}, devNum, function()
-			setVar(DIMMERSID, "LoadLevelStatus", newVal, devNum)
-		end)
+		actionPowerInternal(devNum, newPosition == 0 and 0 or 1, false)
 	else
-		setVar(SWITCHSID, "Target", 0, devNum)	
-		-- Level 0 (not allowed as an "on" status), switch light off.
-		sendDeviceCommand(COMMANDS_SETPOWEROFF, "off", devNum, function()
-			setVar(SWITCHSID, "Status", 0, devNum)
-			setVar(DIMMERSID, "LoadLevelStatus", 0, devNum)
-		end)
+		-- normal dimmer or blind
+		setVar(DIMMERSID, "LoadLevelTarget", newVal, devNum)
+
+		if newVal > 0 then
+			-- Level > 0, if light is off, turn it on.
+			if isDimmer then
+				local status = getVarNumeric(SWITCHSID, "Status", 0, devNum)
+				if status == 0 then
+					actionPowerInternal(devNum, 1, false)
+				end
+			end
+
+			sendDeviceCommand(COMMANDS_SETBRIGHTNESS, newVal, devNum, function()
+				setVar(DIMMERSID, "LoadLevelStatus", newVal, devNum)
+			end)
+		elseif newVal == 0 and getVarNumeric(DIMMERSID, "AllowZeroLevel", 0, devNum) ~= 0 then
+			-- Level 0 allowed as on status, just go with it.
+			sendDeviceCommand(COMMANDS_SETBRIGHTNESS, newVal, devNum, function()
+				setVar(DIMMERSID, "LoadLevelStatus", newVal, devNum)
+			end)
+		else
+			-- Level 0 (not allowed as an "on" status), switch light off.
+			actionPowerInternal(devNum, 0, false)
+		end
 	end
 
 	if newVal > 0 then setVar(DIMMERSID, "LoadLevelLast", newVal, devNum) end
@@ -437,7 +458,10 @@ function actionToggleState(devNum)
 end
 
 -- stop for blinds
-function actionStop(devNum) sendDeviceCommand(COMMANDS_MOVESTOP, nil, devNum) end
+function actionStop(devNum) 
+	D(devNum, "actionStop(%1)", devNum)
+	sendDeviceCommand(COMMANDS_MOVESTOP, nil, devNum) 
+end
 
 -- meters support
 function updateMeters(devNum)
@@ -517,6 +541,8 @@ function startPlugin(devNum)
 			initVar(DIMMERSID, "AllowZeroLevel", "0", deviceID)
 
 			initVar(MYSID, COMMANDS_SETBRIGHTNESS, DEFAULT_ENDPOINT, deviceID)
+			initVar(MYSID, "AutoOff", "0", deviceID)
+
 		elseif deviceType == "D_WindowCovering1.xml" or deviceType == "D_VirtualWindowCovering1.xml" then
 			-- roller shutter
 			initVar(DIMMERSID, "AllowZeroLevel", "1", deviceID)
@@ -524,10 +550,9 @@ function startPlugin(devNum)
 			initVar(DIMMERSID, "LoadLevelStatus", "0", deviceID)
 			initVar(DIMMERSID, "LoadLevelLast", "100", deviceID)
 			
-			initVar(MYSID, "BlindAsSwitch", 0, deviceID)
-
 			initVar(MYSID, COMMANDS_SETBRIGHTNESS, DEFAULT_ENDPOINT, deviceID)
 			initVar(MYSID, COMMANDS_MOVESTOP, DEFAULT_ENDPOINT, deviceID)
+			initVar(MYSID, "BlindAsSwitch", 0, deviceID)
 		else
 			-- binary light
 			setVar(DIMMERSID, "LoadLevelTarget", nil, deviceID)
@@ -536,7 +561,9 @@ function startPlugin(devNum)
 			setVar(DIMMERSID, "LoadLevelLast", nil, deviceID)
 			setVar(DIMMERSID, "TurnOnBeforeDim", nil, deviceID)
 			setVar(DIMMERSID, "AllowZeroLevel", nil, deviceID)
+
 			setVar(MYSID, COMMANDS_SETBRIGHTNESS, nil, deviceID)
+			initVar(MYSID, "AutoOff", "0", deviceID)
 		end
 
 		-- normal switch

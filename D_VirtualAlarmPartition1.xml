@@ -7,6 +7,7 @@
 	<device>
 		<deviceType>urn:schemas-micasaverde-com:device:AlarmPartition:2</deviceType>
 		<staticJson>D_VirtualAlarmPartition1.xml</staticJson>
+		<handleChildren>1</handleChildren>
 		<serviceList>
 			<service>
 				<serviceType>urn:schemas-micasaverde-com:service:AlarmPartition:2</serviceType>

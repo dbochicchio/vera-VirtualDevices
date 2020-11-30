@@ -126,15 +126,14 @@ Temperature setpoints are supported, but only as cosmetic feature. Experimental 
 - Upnp Device Filename/Device File:
 	|Sensor Type|Filename|Device JSON|Category|Subcategory|
 	|---|---|---|---|---|
-	|Door sensor|*D_DoorSensor1.xml*|*D_DoorSensor1.json*|4|1|
-	|Leak sensor|*D_FloodSensor1.xml*|*D_FloodSensor1.json*|4|2|
-	|Motion sensor|*D_MotionSensor1.xml*|*D_MotionSensor1.json* or *D_MotionSensorWithTamper1.json* |4|3|
-	|Smoke sensor|*D_SmokeSensor1.xml*|*D_SmokeCoSensor1.json* or *D_SmokeSensor1.json* or *D_SmokeSensorWithTamper1.json*|4|4|
-	|CO sensor|*D_SmokeSensor1.xml*|*D_COSensor1.json* or *D_SmokeCoSensor1.json*|4|5|
-	|Glass Break|*D_MotionSensor1.xml*|*D_GlassBreakSensor.json* or *D_GlassBreakSensorWithTamper.json*|4|6|
+	|Door sensor|*D_VirtualDoorSensor1.xml*|*D_DoorSensor1.json*|4|1|
+	|Leak sensor|*D_VirtualFloodSensor1.xml*|*D_FloodSensor1.json*|4|2|
+	|Motion sensor|*D_VirtualMotionSensor1.xml*|*D_MotionSensor1.json* or *D_MotionSensorWithTamper1.json* |4|3|
+	|Smoke sensor|*D_VirtualSmokeSensor1.xml*|*D_SmokeCoSensor1.json* or *D_SmokeSensor1.json* or *D_SmokeSensorWithTamper1.json*|4|4|
+	|CO sensor|*D_VirtualSmokeSensor1.xml*|*D_COSensor1.json* or *D_SmokeCoSensor1.json*|4|5|
+	|Glass Break|*D_VirtualMotionSensor1.xml*|*D_GlassBreakSensor.json* or *D_GlassBreakSensorWithTamper.json*|4|6|
 	|Freeze Break|*D_FreezeSensor1.xml*|*D_FreezeSensor1.json*|4|7|
-	|Binary sensor (not really implemented)|*D_MotionSensor1.xml*|*D_MotionSensor1.json*|4|8|
-	|Doorbell|*D_Doorbell1.xml*|*D_Doorbell1.json*|30|0|
+	|Binary sensor (not really implemented)|*D_VirtualMotionSensor1.xml*|*D_MotionSensor1.json*|4|8|
 - Upnp Implementation Filename/Implementation file: *I_VirtualGenericSensor1.xml*
 
 Subcategory number must be changed manually as [reported here](http://wiki.micasaverde.com/index.php/Luup_Device_Categories).
@@ -144,8 +143,6 @@ luup.attr_set("subcategory_num", "2", deviceID)
 ```
 
 > **Remarks**: Some categories share the device file, and a JSON implementation must be manually specified, according to the previous table. It's usually possibile after a reload. Another reaload is necessary after the JSON file is changed.
-
-Support for master devices is not ready yet.
 
 ### Other sensors: Temperature, Humidity, UV, Generic Sensor
 Generic level sensor, such as temperature, humidity, UV and the generic sensor itself, don't need a specific plug-in to work as virtual devices, because no actions are executed by those devices.
@@ -254,26 +251,32 @@ To turn OFF, set *SetPowerOffURL* variable to the corresponding HTTP call.
 You can also specify only *SetPowerURL*, like this: ```http://mydevice/cm?cmnd=Power+%s```
 The %s parameter will be replace with On/Off (this very same case), based on the required action.
 
+### AutoOff (Dimmers, RGB lights, Window Covers/Roller Shutters/Blinds) (v 2.3+)
+
+You can now specify an auto off timer (in seconds) to automatically turn off a light after a given amount of time.
+If you want to implement auto inching and you don't need to call the OFF endpoint, just specify `skip` as *SetPowerOffURL* variable.
+This will just update the status and no HTTP calls are made.
+
 #### Toggle (All)
 Set *SetToggleURL* variable to the corresponding HTTP call.
 - For Tasmota: ```http://mydevice/cm?cmnd=Power+Toggle```
 - For Shelly: ```http://mydevice/relay/0?turn=toggle```
 
 No params required.
-If omitted (blank value or 'http://'), the device will try to change the status according to the local current status. (1.5.1+).
+If omitted (blank value or `http://`), the device will try to change the status according to current local status as reported by *Status* variable. (1.5.1+).
 
 #### Dimming (Dimmers, RGB Lights, Window Covers/Roller Shutters/Blinds)
 Set *SetBrightnessURL* variable to the corresponding HTTP call.
 - For a custom device: ```http://mydevice/brigthness?v=%s```
 
-The %s parameter will be replace with the desired dimming (0/100). Leave 'http://' or blank if not supported.
+The %s parameter will be replaced with the desired dimming (0/100) value. Leave `http://` or blank if not supported.
 
-##### Binary Window Covers/Roller Shutters/Blinds (2.2.3+)
-If you want to emulate a Window Cover/Roller Shutter/Blind but your device is supporting only ON/OFF commands, simply leave *SetBrightnessURL* to its default.
+##### Binary Window Covers/Roller Shutters/Blinds (2.3.0+)
+If you want to emulate a Window Cover/Roller Shutter/Blind but your device is supporting only ON/OFF commands, simply leave *SetBrightnessURL* to its default (`http://`).
 
 Then go to the device's variable and set *BlindAsSwitch* to 1. The device will now work as follows:
-- when position is set on a value between 0 and 50, or down/close button is pressed, the switch off command is sent
-- when position is set on a value between 51 and 100, or up/open button is pressed, the switch off command is sent
+- when position is set to a value between 0 and 50, or down/close buttons are pressed, the switch off command is sent
+- when position is set to a value between 51 and 100, or up/open buttosn are pressed, the switch off command is sent
 
 #### Color (RGB Lights)
 Set *SetRGBColorURL* variable to the corresponding HTTP call.
@@ -285,7 +288,7 @@ The %s parameter will be replace with the RBG color.
 Set *SetWhiteTemperatureURL* variable to the corresponding HTTP call.
  - For a custom device: ```http://mydevice/setwhitemode?v=%s```
 
-The %s parameter will be replace with temperature (from 2000 to 6500 k). Leave 'http://' or blank if not supported
+The %s parameter will be replace with temperature (from 2000 to 6500 k). Leave `http://` or blank if not supported
 
 #### Sensors
 - Set *SetTrippedURL* variable to the corresponding HTTP call (to trip).

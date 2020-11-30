@@ -1,0 +1,1416 @@
+{
+	"default_icon": "../../../icons/MString.png",
+	"x": "2",
+	"y": "4",
+	"inScene": "1",
+	"DisplayStatus": {},
+	"ToggleButton": 1,
+	"Tabs": [
+		{
+			"Label": {
+				"lang_tag": "tabname_control",
+				"text": "Control"
+			},
+			"Position": "0",
+			"TabType": "flash",
+			"ControlGroup": [
+				{
+					"id": "1",
+					"isSingle": "1",
+					"scenegroup": "1"
+				}
+			],
+			"SceneGroup": [
+				{
+					"id": "1",
+					"top": "0",
+					"left": "0",
+					"x": "2",
+					"y": "5"
+				}
+			],
+			"Control": [
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "name1",
+						"text": "V1 Name:"
+					},
+					"Display": {
+						"Top": 20,
+						"Left": 0,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlGroup": "1",
+					"ControlType": "variable",
+					"top": "-0.3",
+					"left": "0",
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "VariableName1",
+						"Top": 20,
+						"Left": 62,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "new",
+						"text": "New:"
+					},
+					"Display": {
+						"Top": 20,
+						"Left": 260,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "input",
+					"ID": "NewN1",
+					"Display": {
+						"Top": 17,
+						"Left": 300,
+						"Width": 100,
+						"Height": 25
+					}
+				},
+				{
+					"ControlType": "button",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "set",
+						"text": "Set"
+					},
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "VariableName1",
+						"Value": "",
+						"Top": 20,
+						"Left": 420,
+						"Width": 75,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Action": "SetVariableName1",
+						"Parameters": [
+							{
+								"Name": "newVariableName1",
+								"ID": "NewN1"
+							}
+						]
+					},
+					"ControlCode": "newn1"
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "value1",
+						"text": "V1 Value:"
+					},
+					"Display": {
+						"Top": 50,
+						"Left": 2,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlGroup": "1",
+					"ControlType": "label",
+					"top": "-0.3",
+					"left": "0.93",
+					"Label": {
+						"lang_tag": "equals",
+						"text": ":"
+					},
+					"Display": {
+						"Top": 420,
+						"Left": 0,
+						"Width": 1,
+						"Height": 20
+					}
+				},
+				{
+					"ControlGroup": "1",
+					"ControlType": "variable",
+					"top": "-0.3",
+					"left": "1",
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "Variable1",
+						"Top": 50,
+						"Left": 62,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "new",
+						"text": "New:"
+					},
+					"Display": {
+						"Top": 50,
+						"Left": 260,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "input",
+					"ID": "NewV1",
+					"Display": {
+						"Top": 47,
+						"Left": 300,
+						"Width": 100,
+						"Height": 25
+					}
+				},
+				{
+					"ControlType": "button",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "set",
+						"text": "Set"
+					},
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "Variable1",
+						"Value": "",
+						"Top": 50,
+						"Left": 420,
+						"Width": 75,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Action": "SetVariable1",
+						"Parameters": [
+							{
+								"Name": "newVariable1",
+								"ID": "NewV1"
+							}
+						]
+					},
+					"ControlCode": "newv1"
+				},
+				{
+					"ControlGroup": 1,
+					"ControlType": "line_break"
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "name2",
+						"text": "V2 Name:"
+					},
+					"Display": {
+						"Top": 100,
+						"Left": 0,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlGroup": "1",
+					"ControlType": "variable",
+					"top": "0.7",
+					"left": "0",
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "VariableName2",
+						"Top": 100,
+						"Left": 62,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "new",
+						"text": "New:"
+					},
+					"Display": {
+						"Top": 100,
+						"Left": 260,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "input",
+					"ID": "NewN2",
+					"Display": {
+						"Top": 97,
+						"Left": 300,
+						"Width": 100,
+						"Height": 25
+					}
+				},
+				{
+					"ControlType": "button",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "set",
+						"text": "Set"
+					},
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "VariableName2",
+						"Value": "",
+						"Top": 100,
+						"Left": 420,
+						"Width": 75,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Action": "SetVariableName2",
+						"Parameters": [
+							{
+								"Name": "newVariableName2",
+								"ID": "NewN2"
+							}
+						]
+					},
+					"ControlCode": "newn2"
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "value2",
+						"text": "V2 Value:"
+					},
+					"Display": {
+						"Top": 130,
+						"Left": 2,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlGroup": "1",
+					"ControlType": "label",
+					"top": "0.7",
+					"left": "0.93",
+					"Label": {
+						"lang_tag": "equals",
+						"text": ":"
+					},
+					"Display": {
+						"Top": 420,
+						"Left": 0,
+						"Width": 1,
+						"Height": 20
+					}
+				},
+				{
+					"ControlGroup": "1",
+					"ControlType": "variable",
+					"top": "0.7",
+					"left": "1",
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "Variable2",
+						"Top": 130,
+						"Left": 62,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "new",
+						"text": "New:"
+					},
+					"Display": {
+						"Top": 130,
+						"Left": 260,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "input",
+					"ID": "NewV2",
+					"Display": {
+						"Top": 127,
+						"Left": 300,
+						"Width": 100,
+						"Height": 25
+					}
+				},
+				{
+					"ControlType": "button",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "set",
+						"text": "Set"
+					},
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "Variable2",
+						"Value": "",
+						"Top": 130,
+						"Left": 420,
+						"Width": 75,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Action": "SetVariable2",
+						"Parameters": [
+							{
+								"Name": "newVariable2",
+								"ID": "NewV2"
+							}
+						]
+					},
+					"ControlCode": "newv2"
+				},
+				{
+					"ControlGroup": 1,
+					"ControlType": "line_break"
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "name3",
+						"text": "V3 Name:"
+					},
+					"Display": {
+						"Top": 180,
+						"Left": 0,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlGroup": "1",
+					"ControlType": "variable",
+					"top": "1.7",
+					"left": "0",
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "VariableName3",
+						"Top": 180,
+						"Left": 62,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "new",
+						"text": "New:"
+					},
+					"Display": {
+						"Top": 180,
+						"Left": 260,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "input",
+					"ID": "NewN3",
+					"Display": {
+						"Top": 177,
+						"Left": 300,
+						"Width": 100,
+						"Height": 25
+					}
+				},
+				{
+					"ControlType": "button",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "set",
+						"text": "Set"
+					},
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "VariableName3",
+						"Value": "",
+						"Top": 180,
+						"Left": 420,
+						"Width": 75,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Action": "SetVariableName3",
+						"Parameters": [
+							{
+								"Name": "newVariableName3",
+								"ID": "NewN3"
+							}
+						]
+					},
+					"ControlCode": "newn3"
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "value3",
+						"text": "V3 Value:"
+					},
+					"Display": {
+						"Top": 210,
+						"Left": 2,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlGroup": "1",
+					"ControlType": "label",
+					"top": "1.7",
+					"left": "0.93",
+					"Label": {
+						"lang_tag": "equals",
+						"text": ":"
+					},
+					"Display": {
+						"Top": 420,
+						"Left": 0,
+						"Width": 1,
+						"Height": 20
+					}
+				},
+				{
+					"ControlGroup": "1",
+					"ControlType": "variable",
+					"top": "1.7",
+					"left": "1",
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "Variable3",
+						"Top": 210,
+						"Left": 62,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "new",
+						"text": "New:"
+					},
+					"Display": {
+						"Top": 210,
+						"Left": 260,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "input",
+					"ID": "NewV3",
+					"Display": {
+						"Top": 207,
+						"Left": 300,
+						"Width": 100,
+						"Height": 25
+					}
+				},
+				{
+					"ControlType": "button",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "set",
+						"text": "Set"
+					},
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "Variable3",
+						"Value": "",
+						"Top": 210,
+						"Left": 420,
+						"Width": 75,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Action": "SetVariable3",
+						"Parameters": [
+							{
+								"Name": "newVariable3",
+								"ID": "NewV3"
+							}
+						]
+					},
+					"ControlCode": "newv3"
+				},
+				{
+					"ControlGroup": 1,
+					"ControlType": "line_break"
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "name4",
+						"text": "V4 Name:"
+					},
+					"Display": {
+						"Top": 260,
+						"Left": 0,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlGroup": "1",
+					"ControlType": "variable",
+					"top": "2.7",
+					"left": "0",
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "VariableName4",
+						"Top": 260,
+						"Left": 62,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "new",
+						"text": "New:"
+					},
+					"Display": {
+						"Top": 260,
+						"Left": 260,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "input",
+					"ID": "NewN4",
+					"Display": {
+						"Top": 257,
+						"Left": 300,
+						"Width": 100,
+						"Height": 25
+					}
+				},
+				{
+					"ControlType": "button",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "set",
+						"text": "Set"
+					},
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "VariableName4",
+						"Value": "",
+						"Top": 260,
+						"Left": 420,
+						"Width": 75,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Action": "SetVariableName4",
+						"Parameters": [
+							{
+								"Name": "newVariableName4",
+								"ID": "NewN4"
+							}
+						]
+					},
+					"ControlCode": "newn4"
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "value4",
+						"text": "V4 Value:"
+					},
+					"Display": {
+						"Top": 290,
+						"Left": 2,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlGroup": "1",
+					"ControlType": "label",
+					"top": "2.7",
+					"left": "0.93",
+					"Label": {
+						"lang_tag": "equals",
+						"text": ":"
+					},
+					"Display": {
+						"Top": 420,
+						"Left": 0,
+						"Width": 1,
+						"Height": 20
+					}
+				},
+				{
+					"ControlGroup": "1",
+					"ControlType": "variable",
+					"top": "2.7",
+					"left": "1",
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "Variable4",
+						"Top": 290,
+						"Left": 62,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "new",
+						"text": "New:"
+					},
+					"Display": {
+						"Top": 290,
+						"Left": 260,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "input",
+					"ID": "NewV4",
+					"Display": {
+						"Top": 287,
+						"Left": 300,
+						"Width": 100,
+						"Height": 25
+					}
+				},
+				{
+					"ControlType": "button",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "set",
+						"text": "Set"
+					},
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "Variable4",
+						"Value": "",
+						"Top": 290,
+						"Left": 420,
+						"Width": 75,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Action": "SetVariable4",
+						"Parameters": [
+							{
+								"Name": "newVariable4",
+								"ID": "NewV4"
+							}
+						]
+					},
+					"ControlCode": "newv4"
+				},
+				{
+					"ControlGroup": 1,
+					"ControlType": "line_break"
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "name5",
+						"text": "V5 Name:"
+					},
+					"Display": {
+						"Top": 340,
+						"Left": 0,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlGroup": "1",
+					"ControlType": "variable",
+					"top": "3.7",
+					"left": "0",
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "VariableName5",
+						"Top": 340,
+						"Left": 62,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "new",
+						"text": "New:"
+					},
+					"Display": {
+						"Top": 340,
+						"Left": 260,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "input",
+					"ID": "NewN5",
+					"Display": {
+						"Top": 337,
+						"Left": 300,
+						"Width": 100,
+						"Height": 25
+					}
+				},
+				{
+					"ControlType": "button",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "set",
+						"text": "Set"
+					},
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "VariableName5",
+						"Value": "",
+						"Top": 340,
+						"Left": 420,
+						"Width": 75,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Action": "SetVariableName5",
+						"Parameters": [
+							{
+								"Name": "newVariableName5",
+								"ID": "NewN5"
+							}
+						]
+					},
+					"ControlCode": "newn5"
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "value5",
+						"text": "V5 Value:"
+					},
+					"Display": {
+						"Top": 370,
+						"Left": 2,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlGroup": "1",
+					"ControlType": "label",
+					"top": "3.7",
+					"left": "0.93",
+					"Label": {
+						"lang_tag": "equals",
+						"text": ":"
+					},
+					"Display": {
+						"Top": 420,
+						"Left": 0,
+						"Width": 1,
+						"Height": 20
+					}
+				},
+				{
+					"ControlGroup": "1",
+					"ControlType": "variable",
+					"top": "3.7",
+					"left": "1",
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "Variable5",
+						"Top": 370,
+						"Left": 62,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "label",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "new",
+						"text": "New:"
+					},
+					"Display": {
+						"Top": 370,
+						"Left": 260,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlType": "input",
+					"ID": "NewV5",
+					"Display": {
+						"Top": 367,
+						"Left": 300,
+						"Width": 100,
+						"Height": 25
+					}
+				},
+				{
+					"ControlType": "button",
+					"top": "0",
+					"left": "0",
+					"Label": {
+						"lang_tag": "set",
+						"text": "Set"
+					},
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Variable": "Variable5",
+						"Value": "",
+						"Top": 370,
+						"Left": 420,
+						"Width": 75,
+						"Height": 20
+					},
+					"Command": {
+						"Service": "urn:upnp-org:serviceId:VContainer1",
+						"Action": "SetVariable5",
+						"Parameters": [
+							{
+								"Name": "newVariable5",
+								"ID": "NewV5"
+							}
+						]
+					},
+					"ControlCode": "newv5"
+				}
+			]
+		},
+		{
+			"Label": {
+				"lang_tag": "advanced",
+				"text": "Advanced"
+			},
+			"Position": "2",
+			"TabType": "javascript",
+			"ScriptName": "shared.js",
+			"Function": "advanced_device"
+		},
+		{
+			"Label": {
+				"lang_tag": "logs",
+				"text": "Logs"
+			},
+			"Position": "4",
+			"TabType": "javascript",
+			"ScriptName": "shared.js",
+			"Function": "device_logs"
+		},
+		{
+			"Label": {
+				"lang_tag": "notifications",
+				"text": "Notifications"
+			},
+			"Position": "5",
+			"TabType": "javascript",
+			"ScriptName": "shared.js",
+			"Function": "device_notifications"
+		}
+	],
+	"eventList2": [
+		{
+			"id": 1,
+			"label": {
+				"lang_tag": "v1 value goes below",
+				"text": "V1 value goes below"
+			},
+			"serviceId": "urn:upnp-org:serviceId:VContainer1",
+			"argumentList": [
+				{
+					"id": 1,
+					"prefix": {
+						"lang_tag": "Value",
+						"text": "Value:"
+					},
+					"dataType": "i4",
+					"name": "Variable1",
+					"comparisson": "<",
+					"suffix": {
+						"lang_tag": "",
+						"text": ""
+					},
+					"HumanFriendlyText": {
+						"lang_tag": "v1_level_goes_below",
+						"text": "V1_level_goes_below"
+					}
+				}
+			]
+		},
+		{
+			"id": 2,
+			"label": {
+				"lang_tag": "v1 value goes above",
+				"text": "V1 value goes above"
+			},
+			"serviceId": "urn:upnp-org:serviceId:VContainer1",
+			"argumentList": [
+				{
+					"id": 1,
+					"prefix": {
+						"lang_tag": "Value",
+						"text": "Value:"
+					},
+					"dataType": "i4",
+					"name": "Variable1",
+					"comparisson": ">",
+					"suffix": {
+						"lang_tag": "",
+						"text": ""
+					},
+					"HumanFriendlyText": {
+						"lang_tag": "v1_level_goes_above",
+						"text": "V1_level_goes_above"
+					}
+				}
+			]
+		},
+		{
+			"id": 3,
+			"label": {
+				"lang_tag": "v1 value equals",
+				"text": "V1 value equals"
+			},
+			"serviceId": "urn:upnp-org:serviceId:VContainer1",
+			"argumentList": [
+				{
+					"id": 1,
+					"prefix": {
+						"lang_tag": "Value",
+						"text": "Value:"
+					},
+					"dataType": "i4",
+					"name": "Variable1",
+					"comparisson": "=",
+					"suffix": {
+						"lang_tag": "",
+						"text": ""
+					},
+					"HumanFriendlyText": {
+						"lang_tag": "v1_level_equals",
+						"text": "V1_level_equals"
+					}
+				}
+			]
+		},
+		{
+			"id": 4,
+			"label": {
+				"lang_tag": "v2 value goes below",
+				"text": "V2 value goes below"
+			},
+			"serviceId": "urn:upnp-org:serviceId:VContainer1",
+			"argumentList": [
+				{
+					"id": 1,
+					"prefix": {
+						"lang_tag": "Value",
+						"text": "Value:"
+					},
+					"dataType": "i4",
+					"name": "Variable2",
+					"comparisson": "<",
+					"suffix": {
+						"lang_tag": "",
+						"text": ""
+					},
+					"HumanFriendlyText": {
+						"lang_tag": "v2_level_goes_below",
+						"text": "V2_level_goes_below"
+					}
+				}
+			]
+		},
+		{
+			"id": 5,
+			"label": {
+				"lang_tag": "v2 value goes above",
+				"text": "V2 value goes above"
+			},
+			"serviceId": "urn:upnp-org:serviceId:VContainer1",
+			"argumentList": [
+				{
+					"id": 1,
+					"prefix": {
+						"lang_tag": "Value",
+						"text": "Value:"
+					},
+					"dataType": "i4",
+					"name": "Variable2",
+					"comparisson": ">",
+					"suffix": {
+						"lang_tag": "",
+						"text": ""
+					},
+					"HumanFriendlyText": {
+						"lang_tag": "v2_level_goes_above",
+						"text": "V2_level_goes_above"
+					}
+				}
+			]
+		},
+		{
+			"id": 6,
+			"label": {
+				"lang_tag": "v2 value equals",
+				"text": "V2 value equals"
+			},
+			"serviceId": "urn:upnp-org:serviceId:VContainer1",
+			"argumentList": [
+				{
+					"id": 1,
+					"prefix": {
+						"lang_tag": "Value",
+						"text": "Value:"
+					},
+					"dataType": "i4",
+					"name": "Variable2",
+					"comparisson": "=",
+					"suffix": {
+						"lang_tag": "",
+						"text": ""
+					},
+					"HumanFriendlyText": {
+						"lang_tag": "v2_level_equals",
+						"text": "V2_level_equals"
+					}
+				}
+			]
+		},
+		{
+			"id": 7,
+			"label": {
+				"lang_tag": "v3 value goes below",
+				"text": "V3 value goes below"
+			},
+			"serviceId": "urn:upnp-org:serviceId:VContainer1",
+			"argumentList": [
+				{
+					"id": 1,
+					"prefix": {
+						"lang_tag": "Value",
+						"text": "Value:"
+					},
+					"dataType": "i4",
+					"name": "Variable3",
+					"comparisson": "<",
+					"suffix": {
+						"lang_tag": "",
+						"text": ""
+					},
+					"HumanFriendlyText": {
+						"lang_tag": "v2_level_goes_below",
+						"text": "V2_level_goes_below"
+					}
+				}
+			]
+		},
+		{
+			"id": 8,
+			"label": {
+				"lang_tag": "v3 value goes above",
+				"text": "V3 value goes above"
+			},
+			"serviceId": "urn:upnp-org:serviceId:VContainer1",
+			"argumentList": [
+				{
+					"id": 1,
+					"prefix": {
+						"lang_tag": "Value",
+						"text": "Value:"
+					},
+					"dataType": "i4",
+					"name": "Variable3",
+					"comparisson": ">",
+					"suffix": {
+						"lang_tag": "",
+						"text": ""
+					},
+					"HumanFriendlyText": {
+						"lang_tag": "v3_level_goes_above",
+						"text": "V3_level_goes_above"
+					}
+				}
+			]
+		},
+		{
+			"id": 9,
+			"label": {
+				"lang_tag": "v3 value equals",
+				"text": "V3 value equals"
+			},
+			"serviceId": "urn:upnp-org:serviceId:VContainer1",
+			"argumentList": [
+				{
+					"id": 1,
+					"prefix": {
+						"lang_tag": "Value",
+						"text": "Value:"
+					},
+					"dataType": "i4",
+					"name": "Variable3",
+					"comparisson": "=",
+					"suffix": {
+						"lang_tag": "",
+						"text": ""
+					},
+					"HumanFriendlyText": {
+						"lang_tag": "v3_level_equals",
+						"text": "V3_level_equals"
+					}
+				}
+			]
+		},
+		{
+			"id": 10,
+			"label": {
+				"lang_tag": "v4 value goes below",
+				"text": "V4 value goes below"
+			},
+			"serviceId": "urn:upnp-org:serviceId:VContainer1",
+			"argumentList": [
+				{
+					"id": 1,
+					"prefix": {
+						"lang_tag": "Value",
+						"text": "Value:"
+					},
+					"dataType": "i4",
+					"name": "Variable4",
+					"comparisson": "<",
+					"suffix": {
+						"lang_tag": "",
+						"text": ""
+					},
+					"HumanFriendlyText": {
+						"lang_tag": "v4_level_goes_below",
+						"text": "V4_level_goes_below"
+					}
+				}
+			]
+		},
+		{
+			"id": 11,
+			"label": {
+				"lang_tag": "v4 value goes above",
+				"text": "V4 value goes above"
+			},
+			"serviceId": "urn:upnp-org:serviceId:VContainer1",
+			"argumentList": [
+				{
+					"id": 1,
+					"prefix": {
+						"lang_tag": "Value",
+						"text": "Value:"
+					},
+					"dataType": "i4",
+					"name": "Variable4",
+					"comparisson": ">",
+					"suffix": {
+						"lang_tag": "",
+						"text": ""
+					},
+					"HumanFriendlyText": {
+						"lang_tag": "v4_level_goes_above",
+						"text": "V4_level_goes_above"
+					}
+				}
+			]
+		},
+		{
+			"id": 12,
+			"label": {
+				"lang_tag": "v4 value equals",
+				"text": "V4 value equals"
+			},
+			"serviceId": "urn:upnp-org:serviceId:VContainer1",
+			"argumentList": [
+				{
+					"id": 1,
+					"prefix": {
+						"lang_tag": "Value",
+						"text": "Value:"
+					},
+					"dataType": "i4",
+					"name": "Variable4",
+					"comparisson": "=",
+					"suffix": {
+						"lang_tag": "",
+						"text": ""
+					},
+					"HumanFriendlyText": {
+						"lang_tag": "v4_level_equals",
+						"text": "V4_level_equals"
+					}
+				}
+			]
+		},
+		{
+			"id": 13,
+			"label": {
+				"lang_tag": "v5 value goes below",
+				"text": "V5 value goes below"
+			},
+			"serviceId": "urn:upnp-org:serviceId:VContainer1",
+			"argumentList": [
+				{
+					"id": 1,
+					"prefix": {
+						"lang_tag": "Value",
+						"text": "Value:"
+					},
+					"dataType": "i4",
+					"name": "Variable5",
+					"comparisson": "<",
+					"suffix": {
+						"lang_tag": "",
+						"text": ""
+					},
+					"HumanFriendlyText": {
+						"lang_tag": "v5_level_goes_below",
+						"text": "V5_level_goes_below"
+					}
+				}
+			]
+		},
+		{
+			"id": 14,
+			"label": {
+				"lang_tag": "v5 value goes above",
+				"text": "V5 value goes above"
+			},
+			"serviceId": "urn:upnp-org:serviceId:VContainer1",
+			"argumentList": [
+				{
+					"id": 1,
+					"prefix": {
+						"lang_tag": "Value",
+						"text": "Value:"
+					},
+					"dataType": "i4",
+					"name": "Variable5",
+					"comparisson": ">",
+					"suffix": {
+						"lang_tag": "",
+						"text": ""
+					},
+					"HumanFriendlyText": {
+						"lang_tag": "v5_level_goes_above",
+						"text": "V5_level_goes_above"
+					}
+				}
+			]
+		},
+		{
+			"id": 15,
+			"label": {
+				"lang_tag": "v5 value equals",
+				"text": "V5 value equals"
+			},
+			"serviceId": "urn:upnp-org:serviceId:VContainer1",
+			"argumentList": [
+				{
+					"id": 1,
+					"prefix": {
+						"lang_tag": "Value",
+						"text": "Value:"
+					},
+					"dataType": "i4",
+					"name": "Variable5",
+					"comparisson": "=",
+					"suffix": {
+						"lang_tag": "",
+						"text": ""
+					},
+					"HumanFriendlyText": {
+						"lang_tag": "v5_level_equals",
+						"text": "V5_level_equals"
+					}
+				}
+			]
+		}
+	],
+	"DeviceType": "urn:schemas-upnp-org:device:VContainer:1",
+	"device_type": "urn:schemas-upnp-org:device:VContainer:1"
+}

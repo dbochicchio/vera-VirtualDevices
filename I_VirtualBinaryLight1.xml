@@ -5,6 +5,7 @@
 			luup.log("VirtualBinaryLight starting...")
 			VirtualBinaryLight1 = require("L_VirtualBinaryLight1")
 			updateMeters = VirtualBinaryLight1.updateMeters
+			actionAutoOff = VirtualBinaryLight1.actionAutoOff
 			return VirtualBinaryLight1.startPlugin(devNum)
 		end
 	</functions>

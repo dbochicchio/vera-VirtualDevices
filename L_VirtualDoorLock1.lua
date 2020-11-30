@@ -1,7 +1,7 @@
 module("L_VirtualDoorLock1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualDoorLock"
-local _PLUGIN_VERSION = "2.2.3"
+local _PLUGIN_VERSION = "2.3.0"
 
 local debugMode = false
 
