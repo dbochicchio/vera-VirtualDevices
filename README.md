@@ -4,7 +4,7 @@ This plug-in intented to provide support for Virtual Devices that performs their
 It's intended to be used with Tasmota, Shelly or any similar device, or with a companion hub (Home Assistant, domoticz, Zway Server, etc).
 This could be used to simulate the entire set of options, still using a native interface and native services, with 100% compatibility to external plug-ins or code.
 
-Partially based with permission on [Yeelight-Vera](https://github.com/toggledbits/Yeelight-Vera) by Patrick Rigney (aka toggledbits).
+RGB virtual devices are partially based with permission on [Yeelight-Vera](https://github.com/toggledbits/Yeelight-Vera) by Patrick Rigney (aka rigpapa on Vera's forums).
 
 # Installation via MiOS App Store
 The files are available via MiOS App Store. Plug-in ID is 9281 if you want to install it manually.
@@ -14,6 +14,9 @@ Go to your Vera web interface, then Apps, Install Apps and search for "Virtual H
 # Manual Installation
 To install, simply upload the files in the release package, using Vera's feature (Go to *Apps*, then *Develop Apps*, then *Luup files* and select *Upload* - multiple files can be selected when uploading).
 To create a new device under Vera, go to *Apps*, then *Develop Apps* and *Create device*. See later for instructions on how to insert the values.
+
+If you're under openLuup, you'd already know how to do ;)
+
 App Store is recommended for stable version, but you'll find new features on GitHub first.
 
 # Async HTTP support (version 1.5+)
@@ -56,14 +59,14 @@ Be sure to start your command URL with *curl://*, then write your curl arguments
 # Multiple calls per action (version 2.2+)
 Starting from version 2.2, multiple calls per action could be specified. Just specifiy each command in its own line.
 
-On openLuup or AltUI, use code to modify it (UI doesn't support multi-line values). Vera is OK.
+On AltUI use code to modify it (UI doesn't support multi-line values). openLuup devices console and Vera are OK.
 
-You can specify mixed commands (ie: curl or native HTTP calls).
+You can specify mixed commands (ie: curl and native HTTP calls).
 
 > Remarks: multiple commands will slow down your system. Do not exceed 3-4 commands per action. Async HTTP are strongly suggested, because they will not block the execution and nicely run in parallel.
 
 # Create a new device
-To create a new device, got to Apps, then Develops, then Create device.
+To create a new device, open your Vera web GUI, go to *Apps*, then *Develop Apps*, then *Create device*.
 
 Every time you want a new virtual device, just repeat this operation.
 
@@ -238,7 +241,7 @@ It's suggested to have one master per controller and how many children you want.
 
 #### Switch On/Off (All)
 
-> **Attention: do not include %20 in your URL, this will cause problems.*
+> **Attention: % in your URL must be escaped, so you need to double them. ie *Power%20On* must be set as *Power%%20On*.*
 
 To turn ON, set *SetPowerURL* variable to the corresponding HTTP call.
  - For Tasmota: ```http://mydevice/cm?cmnd=Power+On```
@@ -249,14 +252,14 @@ To turn OFF, set *SetPowerOffURL* variable to the corresponding HTTP call.
  - For Shelly: ```http://mydevice/relay/0?turn=off```
 
 You can also specify only *SetPowerURL*, like this: ```http://mydevice/cm?cmnd=Power+%s```
-The %s parameter will be replace with On/Off (this very same case), based on the required action.
+The *%s* parameter will be replace with *On*/*Off* (this very same case), based on the required action.
 
 #### AutoOff (Dimmers, RGB lights, Window Covers/Roller Shutters/Blinds) (v 2.3+)
 
 You can now specify an auto off timer (in seconds) to automatically turn off a light after a given amount of time.
 The corresponding variable is *AutoOff*.
 
-If you want to implement auto inching and you don't need to call the OFF endpoint, just specify `skip` as *SetPowerOffURL* variable.
+If you want to implement auto inching and you don't need to call the Off endpoint, just specify `skip` as *SetPowerOffURL* variable.
 This will just update the status and no HTTP calls will be made.
 
 #### Toggle (All)
@@ -362,6 +365,32 @@ http://*veraip*:3480/data_request?id=lr_updateSwitch&device=214&status=0
 ```
 
 > **Remarks**: this handler is intended to turn a switch on/off, but can be adapted for other variables as well.
+
+### Update your Vera/openLuup status with Tasmota's rules
+Tasmota has a rules engine and you use it directly to update virtual device in your Vera/openLuup.
+
+It is possible to create up to three rules for each sensor, each with several `Do` stamements in each rule.
+
+```
+Rule<x> ON <trigger> DO <command> ENDON
+```
+
+It is very easy to find out the name of each sensor for using in the rules by looking at ```http://IP_address/cm?cmnd=Status%2010```
+
+A rule is defined by pasting the rule to the Console window of the sensor.
+After that the rule needs to be enabled by ```Rule1 1```, ```Rule2 1```, etc. A rule is deactivated by ```Rule1 0```, etc.
+After enabling a rule, check in the console that the rule is sending values.
+To see the contents of a rule just type ```Rule1```, ```Rule2```, etc.
+
+Here's an example to update the temperature sensor via a rule, based on a AM3201 sensor.
+
+```
+Rule1 ON tele-AM2301#Temperature DO Var1 %value% ENDON ON tele-AM2301#Temperature DO WebSend http://veraIP:3480/data_request?id=lu_action&DeviceNum=*devID*&id=variableset&serviceId=urn:upnp-org:serviceId:TemperatureSensor1&Variable=CurrentTemperature&Value=%Var1% ENDON
+```
+
+Be sure to insert both *devID* and *VeraIP* according to your settings
+
+[More info on Tasmota docs.](https://tasmota.github.io/docs/Rules/)
 
 ### Ping device for status
 If you want to ping a device and have its status associated to the device, you can write a simple scene like this, to be executed every *x* minutes.
