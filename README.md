@@ -393,7 +393,7 @@ Be sure to insert both *devID* and *VeraIP* according to your settings
 [More info on Tasmota docs.](https://tasmota.github.io/docs/Rules/)
 
 ### Ping device for status
-If you want to ping a device and have its status associated to the device, you can write a simple scene like this, to be executed every *x* minutes.
+If you want to ping a device and have its status associated to the virtual device, you can write a simple scene like this, to be executed every *x* minutes.
 
 ```
 local function ping(address)
