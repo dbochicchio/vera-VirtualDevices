@@ -241,7 +241,7 @@ It's suggested to have one master per controller and how many children you want.
 
 #### Switch On/Off (All)
 
-> **Attention: % in your URL must be escaped, so you need to double them. ie *Power%20On* must be set as *Power%%20On*.*
+> **Attention: `%` in your URL must be escaped, so you need to double them. ie `Power%20On` must be set as `Power%%20On`.*
 
 To turn ON, set *SetPowerURL* variable to the corresponding HTTP call.
  - For Tasmota: ```http://mydevice/cm?cmnd=Power+On```
@@ -416,7 +416,7 @@ Where *devID* is the device ID and *192.168.1.42* is your IP address.
 The devices are working and supported under openLuup and ALTUI. In this case, just be sure the get the base service file from Vera (it's automatic if you have the Vera Bridge installed).
 
 ### Known issues
-- *Attention: do not include %20 in your URL, this will cause problems. It is usually safe to replace with +, in case of %20.*
+- *Attention: `%` in your URL must be escaped, so you need to double them. ie `Power%20On` must be set as `Power%%20On`. It is usually safe to replace with `+`, in case of `%20`.*
 
 ### Support
 If you need more help, please post on Vera's forum and tag me (@therealdb).
