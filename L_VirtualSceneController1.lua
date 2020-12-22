@@ -1,7 +1,7 @@
 module("L_VirtualSceneController1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualSceneController"
-local _PLUGIN_VERSION = "2.3.0"
+local _PLUGIN_VERSION = "2.40"
 
 local debugMode = false
 

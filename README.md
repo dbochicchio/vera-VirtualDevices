@@ -276,7 +276,7 @@ Set *SetBrightnessURL* variable to the corresponding HTTP call.
 
 The %s parameter will be replaced with the desired dimming (0/100) value. Leave `http://` or blank if not supported.
 
-##### Binary Window Covers/Roller Shutters/Blinds (2.3.0+)
+##### Binary Window Covers/Roller Shutters/Blinds (2.40+)
 If you want to emulate a Window Cover/Roller Shutter/Blind but your device is supporting only ON/OFF commands, simply leave *SetBrightnessURL* to its default (`http://`).
 
 Then go to the device's variable and set *BlindAsSwitch* to 1. The device will now work as follows:
@@ -337,6 +337,7 @@ Each device support a single meter endpoint. Create multiple devices to track mu
 - *MeterUpdate*: how frequently you want to poll. 60 seconds by default.
 - *MeterPowerFormat*: the JSON (LUA) path to get the instant power (Watts). It's *meters[1].power* for the first relay in a Shelly. If you're calling */meters/0*, *power* could be specified as well. Change your index accordingly for multi-meters devices.
 - *MeterTotalFormat*: the JSON (LUA) path to get the total consumption (KWH). It's *meters[1].total* for the first relay in a Shelly. If you're calling */meters/0*, *total* could be specified as well. Change your index accordingly for multi-meters devices.
+- *MeterTotalUnit*: *0* if is the device is sending KWH, *1* if Watt-minute (Shelly Plug, 2, EM, etc), *2* if Watt-hour (Shelly 3EM).
 
 ### Update your Vera/openLuup status
 This integration is useful when the Vera system is the primary and only controller for your remote lights.

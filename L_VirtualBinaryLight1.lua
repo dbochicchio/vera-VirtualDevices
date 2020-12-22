@@ -1,7 +1,7 @@
 module("L_VirtualBinaryLight1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualBinaryLight"
-local _PLUGIN_VERSION = "2.3.0"
+local _PLUGIN_VERSION = "2.40"
 
 local debugMode = false
 
@@ -475,6 +475,10 @@ function updateMeters(devNum)
 		end
 		return x or ""
 	end
+	function round(num, numDecimalPlaces)
+		local mult = 10 ^ (numDecimalPlaces or 0)
+		return math.floor(num * mult + 0.5) / mult
+	end
 
 	local meterUpdate = getVarNumeric(MYSID, "MeterUpdate", 0, devNum)
 
@@ -482,8 +486,9 @@ function updateMeters(devNum)
 		L(devNum, "updateMeters: disabled")
 	end
 
-	local kwhPath = getVar(MYSID, "MeterPowerFormat", "", devNum)
-	local wattsPath = getVar(MYSID, "MeterTotalFormat", "", devNum)
+	local wattsPath = getVar(MYSID, "MeterPowerFormat", "", devNum)
+	local kwhPath = getVar(MYSID, "MeterTotalFormat", "", devNum)
+	local format = getVarNumeric(MYSID, "MeterTotalUnit", 0, devNum) -- 0 KWH, 1 Wmin, 2 WH
 
 	local url = getVar(MYSID, COMMANDS_UPDATEMETERS, DEFAULT_ENDPOINT, devNum)
 
@@ -497,16 +502,38 @@ function updateMeters(devNum)
 			local data = json.decode(response)
 
 			if kwhPath ~= "" then
-				D(devNum, "updateMeters - KWH Path %1", kwhPath)
-				local value = getValue(data, kwhPath)
-				D(devNum, "updateMeters - KWH %1", value)
-				setVar(ENERGYMETERSID, "KWH", value, devNum)
+				local value = tonumber(getValue(data, kwhPath))
+				local transformedValue = value
+
+				-- EXPERIMENTAL!
+				if format == 1 then -- Wmin
+					transformedValue = round(round(value / 60, 4) / 1000, 4) -- from Wmin to KWH
+					D(devNum, "[updateMeters] V %1", transformedValue)
+					
+					-- special case for shellies - if value <= stored value, then add value, otherwise compute delta
+					local storedValue = getVarNumeric(ENERGYMETERSID, "KWH", 0, devNum)
+					local delta = 0
+
+					if transformedValue > storedValue then
+						delta = transformedValue - storedValue
+					elseif transformedValue < storedValue then
+						delta = storedValue
+					end
+
+					transformedValue = transformedValue + delta
+
+					D(devNum, "[updateMeters] Format %1 - Delta %2 - Original %3", format, delta, storedValue)
+				elseif format == 2 then -- WH
+					transformedValue = value / 60 -- from WH to KWH
+				end
+				
+				L(devNum, "[updateMeters] KWH Path %1 - Raw Value: %2 - Transformed Value: %3", kwhPath, value, transformedValue)
+				setVar(ENERGYMETERSID, "KWH", round(transformedValue, 4), devNum)
 			end
 
 			if wattsPath ~= "" then
-				D(devNum, "updateMeters - Watts Path %1", wattsPath)
-				local value = getValue(data, wattsPath)
-				D(devNum, "updateMeters - Watts %1", value)
+				local value = tonumber(getValue(data, wattsPath))
+				L(devNum, "[updateMeters] Watts Path: %1 - Value: %2", wattsPath, value)
 				setVar(ENERGYMETERSID, "Watts", value, devNum)
 			end
 		end)
@@ -574,6 +601,7 @@ function startPlugin(devNum)
 		local commandUpdateMeters = initVar(MYSID, COMMANDS_UPDATEMETERS, DEFAULT_ENDPOINT, deviceID)
 		initVar(MYSID, "MeterPowerFormat", "meters[1].power", deviceID)
 		initVar(MYSID, "MeterTotalFormat", "meters[1].total", deviceID)
+		initVar(MYSID, "MeterTotalUnit", "0", deviceID)
 		initVar(MYSID, "MeterUpdate", 0, deviceID)
 
 		if commandUpdateMeters ~= DEFAULT_ENDPOINT then updateMeters(deviceID) end
