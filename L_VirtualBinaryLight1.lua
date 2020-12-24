@@ -509,7 +509,7 @@ function updateMeters(devNum)
 				if format == 1 then -- Wmin
 					transformedValue = round(round(value / 60, 4) / 1000, 4) -- from Wmin to KWH
 					
-					-- special case for shellies - if value <= stored value, then add value, otherwise compute delta
+					-- special case for shellies - if value < stored value, then add value, otherwise compute delta
 					local storedValue = getVarNumeric(ENERGYMETERSID, "KWH", 0, devNum)
 					local delta = 0
 

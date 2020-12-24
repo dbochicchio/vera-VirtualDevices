@@ -329,15 +329,16 @@ Set *SetRequestPanicModeURL* variable to the corresponding HTTP call to request 
 Your script should update the variables *Alarm*, *AlarmMemory*, *LastAlarmActive*, *LastUser*, *VendorStatus*, *VendorStatusCode* and *VendorStatusData* if necessary, via standard luup HTTP call/code.
 
 ### Power consumption (Lights only, 2.1+)
-It's now possible to poll an endpoint and extract power consumption.
+It's now possible to poll an endpoint and extract power consumption and instant power.
 
 Each device support a single meter endpoint. Create multiple devices to track multiple endpoints.
 
-- *SetUpdateMetersURL:* the URL to poll. For Shelly it's: ```http://mydevice/status``` or ```http://mydevice/meters``` or ```http://mydevice/emeters``` (try it in a browser)
+Options:
+- *SetUpdateMetersURL:* the URL to poll. For Shelly it's: ```http://mydevice/status``` or ```http://mydevice/meters``` or ```http://mydevice/emeters``` (try it in a browser before and choose the one giving you the best results).
 - *MeterUpdate*: how frequently you want to poll. 60 seconds by default.
-- *MeterPowerFormat*: the JSON (LUA) path to get the instant power (Watts). It's *meters[1].power* for the first relay in a Shelly. If you're calling */meters/0*, *power* could be specified as well. Change your index accordingly for multi-meters devices.
+- *MeterPowerFormat*: the JSON (LUA) path to get the instant power (in Watts). It's *meters[1].power* for the first relay in a Shelly. If you're calling */meters/0*, *power* could be specified as well. Change your index accordingly for multi-meters devices.
 - *MeterTotalFormat*: the JSON (LUA) path to get the total consumption (KWH). It's *meters[1].total* for the first relay in a Shelly. If you're calling */meters/0*, *total* could be specified as well. Change your index accordingly for multi-meters devices.
-- *MeterTotalUnit*: *0* if is the device is sending KWH, *1* if Watt-minute (Shelly Plug, 2, EM, etc), *2* if Watt-hour (Shelly 3EM).
+- *MeterTotalUnit*: *0* if is the device is reporting KWH, *1* if Watt-minute (Shelly Plug, 2, EM, etc), *2* if Watt-hour (Shelly 3EM). Options 1 and 2 are specifically created for Shellies. Use 0 if your device is reporting KWH.
 
 ### Update your Vera/openLuup status
 This integration is useful when the Vera system is the primary and only controller for your remote lights.
