@@ -270,6 +270,23 @@ end
 local function sendDeviceCommand(cmd, params, devNum, onSuccess)
 	D(devNum, "sendDeviceCommand(%1,%2,%3)", cmd, params, devNum)
 
+	local cmdUrl = getVar(MYSID, cmd, DEFAULT_ENDPOINT, devNum)
+
+	-- SKIP command, just update variables
+	if (cmdUrl:lower() == "skip") then
+		L(devNum, "sendDeviceCommand: skipped")
+		onSuccess("skip")
+		return true
+	elseif cmdUrl:lower():find("^lua://") then
+		-- EXPERIMENTAL!
+		local code = cmdUrl:gsub("^lua://", "")
+		L(devNum, "sendDeviceCommand: RunLua: %1", code)
+		luup.call_action("urn:micasaverde-com:serviceId:HomeAutomationGateway1", "RunLua", {code = code}, 1)
+		onSuccess("lua")
+		return true
+	end
+
+	-- params
 	local pv = {}
 	if type(params) == "table" then
 		for k, v in ipairs(params) do
@@ -285,15 +302,6 @@ local function sendDeviceCommand(cmd, params, devNum, onSuccess)
 		table.insert(pv, tostring(params))
 	end
 	local pstr = table.concat(pv, ",")
-
-	local cmdUrl = getVar(MYSID, cmd, DEFAULT_ENDPOINT, devNum)
-
-	-- SKIP command, just update variables
-	if (cmdUrl == "skip") then
-		D(devNum, "sendDeviceCommand: skipped")
-		onSuccess("skip")
-		return true
-	end
 
 	if (cmdUrl ~= DEFAULT_ENDPOINT) then
 		local urls = split(cmdUrl, "\n")
@@ -486,6 +494,7 @@ function updateMeters(devNum)
 		L(devNum, "updateMeters: disabled")
 	end
 
+	local status = getVar(SWITCHSID, "Status", "0", devNum)
 	local wattsPath = getVar(MYSID, "MeterPowerFormat", "", devNum)
 	local kwhPath = getVar(MYSID, "MeterTotalFormat", "", devNum)
 	local format = getVarNumeric(MYSID, "MeterTotalUnit", 0, devNum) -- 0 KWH, 1 Wmin, 2 WH
@@ -513,12 +522,14 @@ function updateMeters(devNum)
 					local storedValue = getVarNumeric(ENERGYMETERSID, "KWH", 0, devNum)
 					local delta = 0
 
-					if transformedValue > storedValue then
+					if status == "0" then -- ignore reported consumption when turned off
+						D(devNum, "[D] Switch is OFF")	
+						delta = 0
+						transformedValue = storedValue
+					elseif transformedValue > storedValue then
 						delta = transformedValue - storedValue
 					elseif transformedValue < storedValue then
 						delta = storedValue
-					else
-						delta = -transformedValue -- same value, do not update
 					end
 
 					transformedValue = transformedValue + delta
@@ -557,7 +568,7 @@ function startPlugin(devNum)
 		-- generic init
 		initVar(MYSID, "DebugMode", 0, deviceID)
 		initVar(SWITCHSID, "Target", "0", deviceID)
-		initVar(SWITCHSID, "Status", "-1", deviceID)
+		initVar(SWITCHSID, "Status", "0", deviceID)
 
 		-- device specific code
 		if deviceType == "D_DimmableLight1.xml" or deviceType == "D_VirtualDimmableLight1.xml" then

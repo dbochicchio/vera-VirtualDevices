@@ -567,7 +567,7 @@ function startPlugin(devNum)
 		-- generic init
 		initVar(MYSID, "DebugMode", 0, deviceID)
 		initVar(SWITCHSID, "Target", "0", deviceID)
-		initVar(SWITCHSID, "Status", "-1", deviceID)
+		initVar(SWITCHSID, "Status", "0", deviceID)
 
 		initVar(DIMMERSID, "LoadLevelTarget", "0", deviceID)
 		initVar(DIMMERSID, "LoadLevelStatus", "0", deviceID)

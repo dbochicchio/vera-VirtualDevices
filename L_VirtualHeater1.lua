@@ -465,7 +465,7 @@ function startPlugin(devNum)
 		-- generic init
 		initVar(MYSID, "DebugMode", 0, deviceID)
 		initVar(SWITCHSID, "Target", "0", deviceID)
-		initVar(SWITCHSID, "Status", "-1", deviceID)
+		initVar(SWITCHSID, "Status", "0", deviceID)
 
 		-- heater init
 		initVar(HVACSID, "ModeStatus", "Off", deviceID)
