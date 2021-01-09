@@ -1,3 +1,9 @@
+------------------------------------------------------------------------
+-- Copyright (c) 2020-2021 Daniele Bochicchio
+-- License: MIT License
+-- Source Code: https://github.com/dbochicchio/Vera-VirtualDevices
+------------------------------------------------------------------------
+
 module("L_VirtualAlarmPartition1", package.seeall)
 
 local _PLUGIN_NAME = "VirtualAlarmPartition"

@@ -421,11 +421,9 @@ The devices are working and supported under openLuup and ALTUI. In this case, ju
 - *Attention: `%` in your URL must be escaped, so you need to double them. ie `Power%20On` must be set as `Power%%20On`. It is usually safe to replace with `+`, in case of `%20`.*
 
 ### Support
-If you need more help, please post on Vera's forum and tag me (@therealdb).
-
 Before asking for support, please:
  - change *DebugMode* variable to 1 (on the device itself, not on the master)
  - repeat your problem and capture logs
  - logs could be captured via SSH or by navigating to `http://VeraIP/cgi-bin/cmh/log.sh?Device=LuaUPnP`. [More Info](http://wiki.micasaverde.com/index.php/Logs)
 
-[Go to Vera forums.](https://community.getvera.com/t/virtual-http-light-devices-supporting-rgb-ww-dimmers-switch-and-much-more-tasmota-esp-shelly/209297)
+If you need help, visit [SmartHome.Community](https://smarthome.community/) and tag me (therealdb).

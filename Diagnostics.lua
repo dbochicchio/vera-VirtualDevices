@@ -1,3 +1,9 @@
+------------------------------------------------------------------------
+-- Copyright (c) 2020-2021 Daniele Bochicchio
+-- License: MIT License
+-- Source Code: https://github.com/dbochicchio/Vera-VirtualDevices
+------------------------------------------------------------------------
+
 -- DIANGOSTICS
 -- Use this file to see your configuration and get some warning about the configuration
 -- Go to http://VeraIP/cmh/#develop_apps, copy this code, excute and see results into logs
