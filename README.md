@@ -390,6 +390,14 @@ Here's an example to update the temperature sensor via a rule, based on a AM3201
 Rule1 ON tele-AM2301#Temperature DO Var1 %value% ENDON ON tele-AM2301#Temperature DO WebSend http://veraIP:3480/data_request?id=lu_action&DeviceNum=*devID*&id=variableset&serviceId=urn:upnp-org:serviceId:TemperatureSensor1&Variable=CurrentTemperature&Value=%Var1% ENDON
 ```
 
+Here's another one to update the switch status back in your luup system:
+
+```
+Rule1 
+	ON Power1#State=1 do websend [veraIP:3480] /data_request?id=lu_action&DeviceNum=*devID*&id=variableset&serviceId=urn:upnp-org:serviceId:SwitchPower1&Variable=Status&Value=1 ENDON
+	ON Power1#State=0 do websend [veraIP:3480] /data_request?id=lu_action&DeviceNum=*devID*&id=variableset&serviceId=urn:upnp-org:serviceId:SwitchPower1&Variable=Status&Value=0 ENDON
+```
+
 Be sure to insert both *devID* and *VeraIP* according to your settings
 
 [More info on Tasmota docs.](https://tasmota.github.io/docs/Rules/)
