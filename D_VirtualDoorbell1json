@@ -1,0 +1,137 @@
+{
+	"default_icon": "doorbell_static.png",
+	"state_icons": [
+		{
+			"img": "doorbell_static.png",
+			"conditions": [
+				{
+					"service": "urn:micasaverde-com:serviceId:SecuritySensor1",
+					"variable": "Tripped",
+					"operator": "==",
+					"value": 0,
+					"category_num": 30
+				}
+			]
+		},
+		{
+			"img": "doorbell_active.png",
+			"conditions": [
+				{
+					"service": "urn:micasaverde-com:serviceId:SecuritySensor1",
+					"variable": "Tripped",
+					"operator": "==",
+					"value": 1,
+					"category_num": 30
+				}
+			]
+		}
+	],
+	"x": "2",
+	"y": "4",
+	"iconText": "1",
+	"inScene": "1",
+	"ToggleButton": 1,
+	"Tabs": [
+		{
+			"Label": {
+				"lang_tag": "ui7_tabname_control",
+				"text": "Control"
+			},
+			"Position": "0",
+			"TabType": "flash",
+			"top_navigation_tab": 1,
+			"ControlGroup": [
+
+			],
+			"SceneGroup": [
+				{
+					"id": "1",
+					"top": "1",
+					"left": "0",
+					"x": "4",
+					"y": "1"
+				}
+			],
+			"Conditions": [
+
+			]
+		},
+		{
+			"Label": {
+				"lang_tag": "ui7_settings",
+				"text": "Settings"
+			},
+			"Position": "1",
+			"TabType": "javascript",
+			"ScriptName": "shared.js",
+			"Function": "simple_device"
+		},
+		{
+			"Label": {
+				"lang_tag": "ui7_advanced",
+				"text": "Advanced"
+			},
+			"Position": "2",
+			"TabType": "javascript",
+			"ScriptName": "shared.js",
+			"Function": "advanced_device"
+		},
+		{
+			"Label": {
+				"lang_tag": "ui7_device_options",
+				"text": "Device Options"
+			},
+			"Position": "3",
+			"TabType": "javascript",
+			"ScriptName": "shared.js",
+			"Function": "device_zwave_options"
+		},
+		{
+			"Label": {
+				"lang_tag": "ui7_logs",
+				"text": "Logs"
+			},
+			"Position": "4",
+			"TabType": "javascript",
+			"ScriptName": "shared.js",
+			"Function": "device_logs"
+		},
+		{
+			"Label": {
+				"lang_tag": "ui7_notifications",
+				"text": "Notifications"
+			},
+			"Position": "5",
+			"TabType": "javascript",
+			"ScriptName": "shared.js",
+			"Function": "device_notifications"
+		},
+		{
+			"Label": {
+				"lang_tag": "ui7_device_scenes",
+				"text": "Scenes"
+			},
+			"Position": "6",
+			"TabType": "javascript",
+			"ScriptName": "shared.js",
+			"Function": "device_scenes"
+		}
+	],
+	"eventList2": [
+		{
+			"id": 1,
+			"label": {
+				"lang_tag": "ui7_a_doorbell_is_pressed",
+				"text": "Whenever _DEVICE_NAME_ is Pressed"
+			},
+			"serviceId": "urn:micasaverde-com:serviceId:SecuritySensor1",
+			"serviceStateTable": {
+				"Tripped": {
+					"value": "1",
+					"comparisson": "="
+				}
+			}
+		}
+	],
+	"device_type": "urn:schemas-micasaverde-com:device:Doorbell:1"
+}

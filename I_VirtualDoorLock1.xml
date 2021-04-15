@@ -5,7 +5,7 @@
 			luup.log("VirtualDoorLock starting...")
 			VirtualDoorLock1 = require("L_VirtualDoorLock1")
 			virtualDoorLockWatchSync = VirtualDoorLock1.virtualDoorLockWatchSync
-		return VirtualDoorLock1.startPlugin(devNum)
+			return VirtualDoorLock1.startPlugin(devNum)
 		end
 	</functions>
 	<startup>startupPlugin</startup>
@@ -23,7 +23,16 @@
 			<serviceId>urn:upnp-org:serviceId:SwitchPower1</serviceId>
 			<name>SetTarget</name>
 			<run>
-				VirtualBinaryLight1.actionLock(lul_device, lul_settings.newTargetValue)
+				VirtualDoorLock1.actionLock(lul_device, lul_settings.newTargetValue)
+				return 4,0
+			</run>
+		</action>
+
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:HaDevice1</serviceId>
+			<name>ToggleState</name>
+			<run>
+				VirtualDoorLock1.actionToggleState(lul_device)
 				return 4,0
 			</run>
 		</action>

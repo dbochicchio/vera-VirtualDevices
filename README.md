@@ -1,5 +1,5 @@
-# Virtual HTTP Devices plug-in for Vera and openLuup
-This plug-in intented to provide support for Virtual Devices that performs their actions using HTTP calls.
+# Virtual Devices plug-in for Vera and openLuup
+This plug-in intented to provide support for Virtual Devices that performs their actions using HTTP calls, lua code or MQTT messages (openLuup only).
 
 It's intended to be used with Tasmota, Shelly or any similar device, or with a companion hub (Home Assistant, domoticz, Zway Server, etc).
 This could be used to simulate the entire set of options, still using a native interface and native services, with 100% compatibility to external plug-ins or code.
@@ -54,14 +54,44 @@ or sending a JSON payload via POST:
 curl://-d '{"key1":"value1", "key2":"value2"}' -H 'Content-Type: application/json' -X POST 'http://localhost:1234/data'
 ```
 
-Be sure to start your command URL with *curl://*, then write your curl arguments. Be sure to test it via command line to be sure it'll work.
+Be sure to start your command URL with *curl://*, then write your curl arguments. Be sure to test it via command line to be sure it'll work. All the commands are supported.
+
+# Lua Code support (version 2.4+)
+You can also specify lua code as an action to be executed.
+
+Use this format:
+
+```
+lua://yourluacode()
+```
+
+This is useful to execute code in your libraries. All the commands are supported.
+
+# MQTT support (version 3.0+)
+Starting with version 3.0, MQTT messages could be triggered, on openLuup only (be sure to install the latest development version od openLuup).
+
+Use this format:
+```
+topic/=/message
+```
+
+If:
+- your command topic is *shellies/myshelly/relay/0/command*
+- your topic value is *on*
+just use:
+
+```
+shellies/myshelly/relay/0/command/=/on
+```
+
+All the commands are supported. Triggers are coming soon.
 
 # Multiple calls per action (version 2.2+)
 Starting from version 2.2, multiple calls per action could be specified. Just specifiy each command in its own line.
 
 On AltUI use code to modify it (UI doesn't support multi-line values). openLuup devices console and Vera are OK.
 
-You can specify mixed commands (ie: curl and native HTTP calls).
+You can specify only HTTP calls.
 
 > Remarks: multiple commands will slow down your system. Do not exceed 3-4 commands per action. Async HTTP are strongly suggested, because they will not block the execution and nicely run in parallel.
 
