@@ -102,10 +102,10 @@ function startPlugin(devNum)
 		lib.setVar(HASID, "CommFailure", 0, deviceID)
 
 		-- watches
-		luup.variable_watch("AlarmSensorWatch", ALARMSID, "Alarm", deviceID)
-		luup.variable_watch("AlarmSensorWatch", ALARMSID, "LastUser", deviceID)
-		luup.variable_watch("AlarmSensorWatch", ALARMSID, "VendorStatus", deviceID)
-		luup.variable_watch("AlarmSensorWatch", ALARMSID, "DetailedArmMode", deviceID)
+		luup.variable_watch("alarmSensorWatch", ALARMSID, "Alarm", deviceID)
+		luup.variable_watch("alarmSensorWatch", ALARMSID, "LastUser", deviceID)
+		luup.variable_watch("alarmSensorWatch", ALARMSID, "VendorStatus", deviceID)
+		luup.variable_watch("alarmSensorWatch", ALARMSID, "DetailedArmMode", deviceID)
 
 		-- status
 		luup.set_failure(0, deviceID)

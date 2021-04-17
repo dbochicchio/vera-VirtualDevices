@@ -310,6 +310,7 @@ function startPlugin(devNum)
 
 		-- normal switch
 		local commandPower = lib.initVar(MYSID, COMMANDS_SETPOWER, lib.DEFAULT_ENDPOINT, deviceID)
+		lib.initVar(MYSID, COMMANDS_SETPOWEROFF, commandPower, deviceID)
 		lib.initVar(MYSID, COMMANDS_TOGGLE, lib.DEFAULT_ENDPOINT, deviceID)
 
 		-- meters
@@ -320,9 +321,6 @@ function startPlugin(devNum)
 		lib.initVar(MYSID, "MeterUpdate", 0, deviceID)
 
 		if commandUpdateMeters ~= lib.DEFAULT_ENDPOINT then updateMeters(deviceID) end
-
-		-- upgrade code
-		lib.initVar(MYSID, COMMANDS_SETPOWEROFF, commandPower, deviceID)
 
 		local category_num = luup.attr_get("category_num", deviceID) or 0
 		-- set at first run, then make it configurable
@@ -341,6 +339,13 @@ function startPlugin(devNum)
 
 		lib.setVar(HASID, "Configured", 1, deviceID)
 		lib.setVar(HASID, "CommFailure", 0, deviceID)
+
+		-- MQTT
+		lib.initializeMqtt(devNum, {
+			["PowerStatusOn"] = { Service = SWITCHSID, Variable = "Status", Value = "1" },
+			["PowerStatusOff"] = { Service = SWITCHSID, Variable = "Status", Value = "0" },
+			["BrightnessValue"] = { Service = DIMMERSID, Variable = "LoadLevelStatus" }
+			})
 
 		-- status
 		luup.set_failure(0, deviceID)

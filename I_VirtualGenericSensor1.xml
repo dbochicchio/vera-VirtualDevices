@@ -3,8 +3,10 @@
 	<functions>
 		function startupPlugin(devNum)
 			luup.log("VirtualGenericSensor starting...")
+			
 			VirtualGenericSensor1 = require("L_VirtualGenericSensor1")
 			sensorWatch = VirtualGenericSensor1.sensorWatch
+
 			return VirtualGenericSensor1.startPlugin(devNum)
 		end
 	</functions>

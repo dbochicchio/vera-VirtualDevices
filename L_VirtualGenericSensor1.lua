@@ -15,7 +15,6 @@ local COMMANDS_UNTRIPPED					= "SetUnTrippedURL"
 local COMMANDS_ARMED						= "SetArmedURL"
 local COMMANDS_UNARMED						= "SetUnArmedURL"
 
-
 -- implementation
 function actionArmed(devNum, state)
 	state = tostring(state or "0")

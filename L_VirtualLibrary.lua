@@ -7,7 +7,7 @@
 module("L_VirtualLibrary", package.seeall)
 
 _PLUGIN_NAME = "VirtualDevices"
-_PLUGIN_VERSION = "3.0-beta1"
+_PLUGIN_VERSION = "3.0-beta2"
 
 DEFAULT_ENDPOINT						= "http://"
 local MYSID								= ""
@@ -307,12 +307,12 @@ function sendDeviceCommand(MYSID, cmd, params, devNum, onSuccess)
 		-- EXPERIMENTAL! openLuup only!
 		if openLuup then
 			-- format is topic/=/message
-			local topic, message = cmdUrl:gsub("^mqtt://", "") :match "^(.-)/=/(.+)"
-			message = string.format(message, pstr)
-			D(devNum, "sendDeviceCommand.mqtt - Topic: %1 - Message: %2", topic, message)
+			local topic, payload = cmdUrl:gsub("^mqtt://", "") :match "^(.-)/=/(.+)"
+			payload = string.format(payload, pstr)
+			D(devNum, "sendDeviceCommand.mqtt - Topic: %1 - Payload: %2", topic, payload)
 
 			local mqtt = require "openLuup.mqtt"
-			mqtt.publish(topic, message)
+			mqtt.publish(topic, payload)
 			
 			onSuccess('mqtt')
 		else
@@ -341,6 +341,34 @@ function sendDeviceCommand(MYSID, cmd, params, devNum, onSuccess)
 	return false
 end
 
+function _G.virtualDeviceMQTTHandler(w, payload, args)
+	D(499, "virtualDeviceMQTTHandler(%1,%2,%3)", v, payload, args)
+	local opts = args.opts
+	if payload == args.payload or args.payload == "*" then -- check for payload, or just update with the value
+		setVar(opts.Service, opts.Variable, opts.Value or payload, args.deviceID)
+	end
+end
+
+function subscribeToMqtt(devNum, opt)
+	--local mqtt = require "openLuup.mqtt"
+	D(devNum, "subscribeToMqtt(%1,%2,%3)", devNum, opt.topic, opt)
+	luup.register_handler("virtualDeviceMQTTHandler", "mqtt:" .. opt.topic, opt)
+end
+
+function initializeMqtt(devNum, opts)
+	D(devNum, "initializeMqtt(%1,%2) - openLuup: %3", devNum, opts, openLuup)
+	if not openLuup then return end -- openLuup only
+
+	-- [COMMANDS_SETPOWER] = { Service = SWITCHSID, Variable = "Status" },
+	for name, item in next, opts do
+		local mqttCommand = initVar(item.Service, "MQTT_" .. name, '', devNum)
+		if mqttCommand ~= nil and mqttCommand ~= "" then
+			local topic, payload = mqttCommand:gsub("^mqtt://", "") :match "^(.-)/=/(.+)"
+			subscribeToMqtt(devNum, {opts = item, deviceID = devNum, topic = topic, payload = payload})
+		end
+	end
+end
+
 function startup(devNum, sid)
 	MYSID = sid
 	L(devNum, "Plugin starting")
@@ -352,13 +380,4 @@ function startup(devNum, sid)
 			openLuup = true
 		end
 	end
-	
-	-- MQTT: TODO
-	--local mqtt = require "openLuup.mqtt"
-	--function test_MQTT_callback (...)
-	--  luup.log ((json.encode {...}))
-	--end
-	--
-	--luup.register_handler ("test_MQTT_callback", "mqtt:test", {a = "A", b = "B"})
-	--luup.register_handler ("test_MQTT_callback", "mqtt:test", {c = "C", d = "D"})
 end

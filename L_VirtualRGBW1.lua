@@ -325,6 +325,16 @@ function startPlugin(devNum)
 		lib.setVar(HASID, "Configured", 1, deviceID)
 		lib.setVar(HASID, "CommFailure", 0, deviceID)
 		
+		-- MQTT
+		lib.initializeMqtt(devNum, {
+			["PowerStatusOn"] = { Service = SWITCHSID, Variable = "Status", Value = "1" },
+			["PowerStatusOff"] = { Service = SWITCHSID, Variable = "Status", Value = "0" },
+			["BrightnessValue"] = { Service = DIMMERSID, Variable = "LoadLevelStatus" },
+			["BrightnessValue"] = { Service = DIMMERSID, Variable = "LoadLevelTarget" },
+			["Color"] = { Service = COLORSID, Variable = "CurrentColor" }, -- TODO: parse it?
+			["WhiteTemperature"] = { Service = COLORSID, Variable = "CurrentColor" } -- TODO: parse it?
+			})
+
 		-- status
 		luup.set_failure(0, deviceID)
 

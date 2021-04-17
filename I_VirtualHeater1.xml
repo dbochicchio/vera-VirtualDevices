@@ -2,11 +2,13 @@
 <implementation>
 	<functions>
 		function startupPlugin(devNum)
-		luup.log("VirtualHeater starting...")
-		VirtualHeater1 = require("L_VirtualHeater1")
-		virtualThermostatWatch = VirtualHeater1.virtualThermostatWatch
-		virtualThermostatWatchSync = VirtualHeater1.virtualThermostatWatchSync
-		return VirtualHeater1.startPlugin(devNum)
+			luup.log("VirtualHeater starting...")
+
+			VirtualHeater1 = require("L_VirtualHeater1")
+			virtualThermostatWatch = VirtualHeater1.virtualThermostatWatch
+			virtualThermostatWatchSync = VirtualHeater1.virtualThermostatWatchSync
+
+			return VirtualHeater1.startPlugin(devNum)
 		end
 	</functions>
 	<startup>startupPlugin</startup>

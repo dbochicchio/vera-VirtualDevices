@@ -78,13 +78,37 @@ topic/=/message
 If:
 - your command topic is *shellies/myshelly/relay/0/command*
 - your topic value is *on*
+
 just use:
 
 ```
 shellies/myshelly/relay/0/command/=/on
 ```
 
-All the commands are supported. Triggers are coming soon.
+All the commands are supported.
+
+## MQTT Status
+Status from MQTT message is supported as well, but only on openLuup.
+
+Look for *MQTT_* variables and insert something like this:
+
+```
+payload/=/value
+```
+
+If you specify this version:
+
+```
+shellies/shelly-rain/input/0/+/0
+```
+
+you can set the corresponding status when a message in topic *shellies/shelly-rain/input/0/* is sent with a value of *0*.
+
+To pass the value to the corresponding variable, just specificy "*" as *value*. Here's an example:
+
+```
+shellies/shelly-rain/ext_temperature/0/+/*
+```
 
 # Multiple calls per action (version 2.2+)
 Starting from version 2.2, multiple calls per action could be specified. Just specifiy each command in its own line.

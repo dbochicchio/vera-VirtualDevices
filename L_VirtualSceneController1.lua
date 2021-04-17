@@ -11,6 +11,7 @@ local SCENESID								= "urn:micasaverde-com:serviceId:SceneController1"
 local SCENELEDSID							= "urn:micasaverde-com:serviceId:SceneControllerLED1"
 local HASID									= "urn:micasaverde-com:serviceId:HaDevice1"
 
+-- implementation
 function startPlugin(devNum)
 	lib = require("L_VirtualLibrary")
 	lib.startup(devNum, MYSID)

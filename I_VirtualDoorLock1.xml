@@ -3,8 +3,10 @@
 	<functions>
 		function startupPlugin(devNum)
 			luup.log("VirtualDoorLock starting...")
+			
 			VirtualDoorLock1 = require("L_VirtualDoorLock1")
 			virtualDoorLockWatchSync = VirtualDoorLock1.virtualDoorLockWatchSync
+			
 			return VirtualDoorLock1.startPlugin(devNum)
 		end
 	</functions>

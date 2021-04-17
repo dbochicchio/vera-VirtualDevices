@@ -3,7 +3,9 @@
 	<functions>
 		function startupPlugin(devNum)
   		luup.log("VirtualRGBW starting...")
-		  VirtualRGBW1 = require("L_VirtualRGBW1")
+			
+			VirtualRGBW1 = require("L_VirtualRGBW1")
+
 		  return VirtualRGBW1.startPlugin(devNum)
 		end
 	</functions>
