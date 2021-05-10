@@ -72,7 +72,7 @@ Starting with version 3.0, MQTT messages could be triggered, on openLuup only (b
 
 Use this format:
 ```
-topic/=/message
+mqtt://topic/=/message
 ```
 
 If:
@@ -82,13 +82,13 @@ If:
 just use:
 
 ```
-shellies/myshelly/relay/0/command/=/on
+mqtt://shellies/myshelly/relay/0/command/=/on
 ```
 
-All the commands are supported.
+All the commands are supported on all devices.
 
 ## MQTT Status
-Status from MQTT message is supported as well, but only on openLuup.
+Status from MQTT message is supported as well, and on openLuup only.
 
 Look for *MQTT_* variables and insert something like this:
 
@@ -96,7 +96,7 @@ Look for *MQTT_* variables and insert something like this:
 payload/=/value
 ```
 
-If you specify this version:
+If you specify this value:
 
 ```
 shellies/shelly-rain/input/0/+/0
@@ -104,7 +104,9 @@ shellies/shelly-rain/input/0/+/0
 
 you can set the corresponding status when a message in topic *shellies/shelly-rain/input/0/* is sent with a value of *0*.
 
-To pass the value to the corresponding variable, just specificy "*" as *value*. Here's an example:
+To pass the value to the corresponding variable, just specificy "*" as *value*.
+
+Here's an example to get the value from a topic:
 
 ```
 shellies/shelly-rain/ext_temperature/0/+/*
