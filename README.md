@@ -9,7 +9,7 @@ RGB virtual devices are partially based with permission on [Yeelight-Vera](https
 # Installation via MiOS App Store
 The files are available via MiOS App Store. Plug-in ID is 9281 if you want to install it manually.
 
-Go to your Vera web interface, then Apps, Install Apps and search for "Virtual HTTP Devices". Click Details, then Install.
+Go to your Vera web interface, then Apps, Install Apps and search for "Virtual Devices". Click Details, then Install.
 
 # Manual Installation
 To install, simply upload the files in the release package, using Vera's feature (Go to *Apps*, then *Develop Apps*, then *Luup files* and select *Upload* - multiple files can be selected when uploading).
@@ -375,11 +375,15 @@ Set *SetMoveStopURL* variable to the corresponding HTTP call.
 
 No parameters are sent.
 
+#### Setpoint for Heaters
+Set *SetSetpointURL* variable to the corresponding call to change the setpoint for your heater.
+ - For a custom device: ```http://mydevice/heater/temperature?v=%s```
+
 #### Alarms
-Set *SetRequestArmModeURL* variable to the corresponding HTTP call to change the alarm state.
+Set *SetRequestArmModeURL* variable to the corresponding call to change the alarm state.
  - For a custom device: ```http://mydevice/alarm/state?state=%s&pincode=%s```
 
-Set *SetRequestPanicModeURL* variable to the corresponding HTTP call to request panic mode.
+Set *SetRequestPanicModeURL* variable to the corresponding call to request panic mode.
  - For a custom device: ```http://mydevice/alarm/panic?state=%s```
 
 Your script should update the variables *Alarm*, *AlarmMemory*, *LastAlarmActive*, *LastUser*, *VendorStatus*, *VendorStatusCode* and *VendorStatusData* if necessary, via standard luup HTTP call/code.
