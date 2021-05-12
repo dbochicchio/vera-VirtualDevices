@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------
--- Copyright (c) 2020-2021 Daniele Bochicchio
+-- Copyright (c) 2019-2021 Daniele Bochicchio
 -- License: MIT License
 -- Source Code: https://github.com/dbochicchio/Vera-VirtualDevices
 ------------------------------------------------------------------------
@@ -7,7 +7,7 @@
 module("L_VirtualLibrary", package.seeall)
 
 _PLUGIN_NAME = "VirtualDevices"
-_PLUGIN_VERSION = "3.0-beta2"
+_PLUGIN_VERSION = "3.0-beta3"
 
 DEFAULT_ENDPOINT						= "http://"
 local MYSID								= ""
@@ -316,7 +316,7 @@ function sendDeviceCommand(MYSID, cmd, params, devNum, onSuccess)
 			
 			onSuccess('mqtt')
 		else
-			deviceMessage(devNum, "This feature is openLuup only!.", true, 0)
+			deviceMessage(devNum, "This feature requires openLuup", true, 0)
 		end
 		return true
 	elseif cmdUrl:lower():find("^lua://") then

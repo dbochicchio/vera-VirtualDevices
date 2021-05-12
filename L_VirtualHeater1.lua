@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------
--- Copyright (c) 2020-2021 Daniele Bochicchio
+-- Copyright (c) 2019-2021 Daniele Bochicchio
 -- License: MIT License
 -- Source Code: https://github.com/dbochicchio/Vera-VirtualDevices
 ------------------------------------------------------------------------
@@ -17,6 +17,7 @@ local HASID									= "urn:micasaverde-com:serviceId:HaDevice1"
 
 local COMMANDS_SETPOWER						= "SetPowerURL"
 local COMMANDS_SETPOWEROFF					= "SetPowerOffURL"
+local COMMANDS_SETSETPOINT					= "SetSetpointURL"
 
 -- implementation
 
@@ -89,9 +90,13 @@ function actionSetCurrentSetpoint(devNum, newSetPoint)
 		-- on off/idle, just ignore?
 		lib.D(devNum, "actionSetCurrentSetpoint: skipped")
 	else
-		-- just set variable, watch will do the real work
-		lib.setVar(TEMPSETPOINTSID, "CurrentSetpoint", newSetPoint, devNum)
 		lib.D(devNum, "actionSetCurrentSetpoint: set to %1", newSetPoint)
+
+		-- send command
+		lib.sendDeviceCommand(MYSID, COMMANDS_SETSETPOINT, newSetPoint, devNum, function()
+			-- just set variable, watch will do the real work
+			lib.setVar(TEMPSETPOINTSID, "CurrentSetpoint", newSetPoint, devNum)
+		end)
 	end
 end
 
@@ -136,7 +141,7 @@ function virtualThermostatWatch(devNum, sid, var, oldVal, newVal)
 		if var == "ModeTarget" then
 			if (newVal or "") == "" then newVal = "Off" end -- AltUI+Openluup bug
 			-- no need to check is changed, because sometimes ModeTarget and ModeStatus are out of sync
-			lib.actionPower(devNum, (newVal == "Off" and "0" or "1"))
+			lib.actionPower(devNum, (newVal or "") == "Off" and "0" or "1")
 		elseif var == "ModeStatus" then
 			-- nothing to to do at the moment
 		end
@@ -194,6 +199,7 @@ function startPlugin(devNum)
 		-- http calls init
 		lib.initVar(MYSID, COMMANDS_SETPOWER, lib.DEFAULT_ENDPOINT, deviceID)
 		lib.initVar(MYSID, COMMANDS_SETPOWEROFF, lib.DEFAULT_ENDPOINT, deviceID)
+		lib.initVar(MYSID, COMMANDS_SETSETPOINT, lib.DEFAULT_ENDPOINT, deviceID)
 
 		-- set at first run, then make it configurable
 		if luup.attr_get("category_num", deviceID) == nil then

@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------
--- Copyright (c) 2020-2021 Daniele Bochicchio
+-- Copyright (c) 2019-2021 Daniele Bochicchio
 -- License: MIT License
 -- Source Code: https://github.com/dbochicchio/Vera-VirtualDevices
 ------------------------------------------------------------------------
