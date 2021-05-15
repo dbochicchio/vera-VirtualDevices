@@ -337,9 +337,6 @@ function startPlugin(devNum)
 			luup.attr_set("subcategory_num", "3", deviceID) -- in wall switch
 		end
 
-		lib.setVar(HASID, "Configured", 1, deviceID)
-		lib.setVar(HASID, "CommFailure", 0, deviceID)
-
 		-- MQTT
 		lib.initializeMqtt(devNum, {
 			["PowerStatusOn"] = { Service = SWITCHSID, Variable = "Status", Value = "1" },
@@ -348,6 +345,8 @@ function startPlugin(devNum)
 			})
 
 		-- status
+		lib.setVar(HASID, "Configured", 1, deviceID)
+		lib.setVar(HASID, "CommFailure", 0, deviceID)
 		luup.set_failure(0, deviceID)
 
 		lib.D(devNum, "Plugin start (completed): child #%1", deviceID)

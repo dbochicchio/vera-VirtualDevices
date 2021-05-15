@@ -88,7 +88,7 @@ function startPlugin(devNum)
 		lib.initVar(ALARMSID, "VendorStatusCode", "", deviceID)
 		lib.initVar(ALARMSID, "LastUser", "", deviceID)
 
-		-- http calls init
+		-- commands init
 		lib.initVar(MYSID, COMMANDS_ARM, lib.DEFAULT_ENDPOINT, deviceID)
 		lib.initVar(MYSID, COMMANDS_PANICMODE, lib.DEFAULT_ENDPOINT, deviceID)
 
