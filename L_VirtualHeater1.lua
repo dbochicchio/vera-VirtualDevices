@@ -38,8 +38,11 @@ function actionPower(devNum, state)
 
 	-- send command
 	lib.sendDeviceCommand(MYSID, state and COMMANDS_SETPOWER or COMMANDS_SETPOWEROFF, state and "on" or "off", devNum, function()
-		lib.setVar(SWITCHSID, "Status", state and "1" or "0", devNum)
 		lib.setVar(HVACSID, "ModeStatus", state and "HeatOn" or "Off", devNum)
+
+		-- update setpoint
+		local targetTemp = lib.getVarNumeric(TEMPSETPOINTSID_HEAT, "CurrentSetpoint", -1, devNum)
+		actionSetCurrentSetpoint(devNum, targetTemp)
 	end)
 end
 
@@ -109,17 +112,14 @@ function actionSetEnergyModeTarget(devNum, newMode)
 end
 
 -- change mode target
-function actionSetModeTarget(devNum, newMode)
-	if (newMode or "") == "" then newMode = "Off" end
-	lib.D(devNum, "actionSetModeTarget(%1,%2)", devNum, newMode)
+function actionSetModeTarget(devNum, newVal)
+	if (newVal or "") == "" then newVal = "Off" end
+	lib.D(devNum, "actionSetModeTarget(%1,%2)", devNum, newVal)
 	
-	-- just set variable, watch will do the real work
-	local updated = lib.setVar(HVACSID, "ModeTarget", newMode, devNum, true)
+	lib.setVar(HVACSID, "ModeTarget", newVal, devNum, true)
 
-	-- race condition: target is set, status is not updated
-	if not updated then
-		actionPower(devNum, (newMode == "Off" and "0" or "1"))
-	end
+	-- no need to check is changed, because sometimes ModeTarget and ModeStatus are out of sync
+	actionPower(devNum, (newVal or "") == "Off" and "0" or "1")
 
 	return true
 end
@@ -140,10 +140,9 @@ function virtualThermostatWatch(devNum, sid, var, oldVal, newVal)
 	if sid == HVACSID then
 		if var == "ModeTarget" then
 			if (newVal or "") == "" then newVal = "Off" end -- AltUI+Openluup bug
-			-- no need to check is changed, because sometimes ModeTarget and ModeStatus are out of sync
-			lib.actionPower(devNum, (newVal or "") == "Off" and "0" or "1")
 		elseif var == "ModeStatus" then
-			-- nothing to to do at the moment
+			-- update switch SID
+			lib.setVar(SWITCHSID, "Status", tostring(newVal or "") and "1" or "0", devNum)
 		end
 	elseif sid == TEMPSETPOINTSID then
 		if (newVal or "") ~= "" and var == "CurrentSetpoint" and hasChanged then
@@ -196,7 +195,7 @@ function startPlugin(devNum)
 		lib.initVar(TEMPSENSORSSID, "CurrentTemperature", "18", deviceID)
 		lib.initVar(MYSID, "TemperatureDevice", "0", deviceID)
 
-		-- http calls init
+		-- commands init
 		lib.initVar(MYSID, COMMANDS_SETPOWER, lib.DEFAULT_ENDPOINT, deviceID)
 		lib.initVar(MYSID, COMMANDS_SETPOWEROFF, lib.DEFAULT_ENDPOINT, deviceID)
 		lib.initVar(MYSID, COMMANDS_SETSETPOINT, lib.DEFAULT_ENDPOINT, deviceID)
@@ -232,10 +231,17 @@ function startPlugin(devNum)
 			luup.variable_watch("virtualThermostatWatchSync", TEMPSENSORSSID, "CurrentTemperature", temperatureDeviceID)
 		end
 
-		lib.setVar(HASID, "Configured", 1, deviceID)
-		lib.setVar(HASID, "CommFailure", 0, deviceID)
+		-- MQTT
+		lib.initializeMqtt(devNum, {
+			["PowerStatusOn"] = { Service = HVACSID, Variable = "ModeStatus", Value = "HeatOn" },
+			["PowerStatusOff"] = { Service = HVACSID, Variable = "ModeStatus", Value = "Off" },
+			["TargetTemperature"] = { Service = TEMPSETPOINTSID, Variable = "CurrentSetpoint" },
+			["Temperature"] = { Service = TEMPSENSORSSID, Variable = "CurrentTemperature" }
+			})
 
 		-- status
+		lib.setVar(HASID, "Configured", 1, deviceID)
+		lib.setVar(HASID, "CommFailure", 0, deviceID)
 		luup.set_failure(0, deviceID)
 	end
 

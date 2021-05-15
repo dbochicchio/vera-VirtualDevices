@@ -43,10 +43,9 @@ function startPlugin(devNum)
 		lib.initVar(SCENESID, "sl_SceneDeactivated", "0", deviceID)
 		lib.initVar(SCENESID, "Scenes", "", deviceID)
 
+		-- status
 		lib.setVar(HASID, "Configured", 1, deviceID)
 		lib.setVar(HASID, "CommFailure", 0, deviceID)
-		
-		-- status
 		luup.set_failure(0, deviceID)
 
 		lib.D(devNum, "Plugin start (completed): child #%1", deviceID)

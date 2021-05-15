@@ -68,7 +68,7 @@ function startPlugin(devNum)
 		lib.initVar(SECURITYSID, "Armed", "0", deviceID)
 		lib.initVar(SECURITYSID, "Tripped", "0", deviceID)
 
-		-- http calls init
+		-- commands init
 		local commandTripped = lib.initVar(MYSID, COMMANDS_TRIPPED, lib.DEFAULT_ENDPOINT, deviceID)
 		local commandArmed = lib.initVar(MYSID, COMMANDS_ARMED, lib.DEFAULT_ENDPOINT, deviceID)
 
@@ -92,11 +92,10 @@ function startPlugin(devNum)
 		luup.variable_watch("sensorWatch", SECURITYSID, "Tripped", deviceID)
 		--luup.variable_watch("sensorWatch", SECURITYSID, "Armed", deviceID)
 
-		lib.setVar(HASID, "Configured", 1, deviceID)
-		lib.setVar(HASID, "CommFailure", 0, deviceID)
-
 		-- status
 		luup.set_failure(0, deviceID)
+		lib.setVar(HASID, "Configured", 1, deviceID)
+		lib.setVar(HASID, "CommFailure", 0, deviceID)
 
 		lib.D(devNum, "Plugin start (completed): child #%1", deviceID)
 	end

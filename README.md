@@ -175,9 +175,9 @@ Many different devices could be mapped with this service.
 - Upnp Device Filename/Device File (legacy mode): *D_Heater1.xml*
 - Upnp Implementation Filename/Implementation file: *I_VirtualHeater1.xml*
 
-The device will emulate a basic Heater, and turn on or off the associated device, translating this actions to a virtual thermostat handler.
+The device will emulate a basic Heater, and turn on or off the associated device, translating the actions to a virtual thermostat handler.
 
-Temperature setpoints are supported, but only as cosmetic feature. Experimental setpoints support is added.
+Temperature setpoints are supported via specific commands. Experimental setpoints support is added.
 
 > **Remarks**: An external temperature sensor could be specified with *urn:bochicchio-com:serviceId:VirtualHeater1*/*TemperatureDevice*. If specified, the thermostat will copy its temperature from an external device. If omitted, you can update the corresponding variable of the thermostat using HTTP call or LUA code.
 

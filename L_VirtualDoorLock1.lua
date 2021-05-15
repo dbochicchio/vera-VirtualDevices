@@ -67,7 +67,7 @@ function startPlugin(devNum)
 		-- generic init
 		lib.initVar(MYSID, "DebugMode", 0, deviceID)
 
-		-- http calls init
+		-- commands init
 		lib.initVar(MYSID, COMMANDS_LOCK, lib.DEFAULT_ENDPOINT, deviceID)
 		lib.initVar(MYSID, COMMANDS_UNLOCK, lib.DEFAULT_ENDPOINT, deviceID)
 
@@ -88,12 +88,10 @@ function startPlugin(devNum)
 
 			luup.variable_watch("virtualDoorLockWatchSync", SECURITYSID, "Tripped", sensorDeviceID)
 		end
-
-		lib.setVar(HASID, "Configured", 1, deviceID)
-		lib.setVar(HASID, "CommFailure", 0, deviceID)
-
 		-- status
 		luup.set_failure(0, deviceID)
+		lib.setVar(HASID, "Configured", 1, deviceID)
+		lib.setVar(HASID, "CommFailure", 0, deviceID)
 
 		lib.D(devNum, "Plugin start (completed): child #%1", deviceID)
 	end

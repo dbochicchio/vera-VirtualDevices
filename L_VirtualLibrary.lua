@@ -7,7 +7,7 @@
 module("L_VirtualLibrary", package.seeall)
 
 _PLUGIN_NAME = "VirtualDevices"
-_PLUGIN_VERSION = "3.0-beta3"
+_PLUGIN_VERSION = "3.0-beta4"
 
 DEFAULT_ENDPOINT						= "http://"
 local MYSID								= ""
@@ -342,17 +342,41 @@ function sendDeviceCommand(MYSID, cmd, params, devNum, onSuccess)
 end
 
 function _G.virtualDeviceMQTTHandler(w, payload, args)
-	D(499, "virtualDeviceMQTTHandler(%1,%2,%3)", v, payload, args)
+	D(args.deviceID, "virtualDeviceMQTTHandler(%1,%2,%3)", w, payload, args)
 	local opts = args.opts
-	if payload == args.payload or args.payload == "*" then -- check for payload, or just update with the value
+
+	local path, valueToMatch = args.payload :match "^(.-)/=/(.+)"
+
+	if path ~= nil and valueToMatch ~= nil then -- check for payload and a value to match
+		D(devNum, "virtualDeviceMQTTHandler: processing %1, %2", path, valueToMatch)
+
+		local json = require "dkjson"
+		local data = json.decode(payload)
+		local x = data or ""
+		for field in path: gmatch "[^%.%[%]]+" do
+			if x ~= nil and field ~= nil then
+				x = x[tonumber(field) or field]
+			end
+		end
+		local matchedValue = x or ""
+		
+		D(devNum, "virtualDeviceMQTTHandler: got %1", matchedValue)
+		if matchedValue == valueToMatch or valueToMatch == "*" then
+			D(devNum, "virtualDeviceMQTTHandler: matched %1", valueToMatch == "*" and matchedValue or opts.Value)
+			setVar(opts.Service, opts.Variable, valueToMatch == "*" and matchedValue or opts.Value, args.deviceID)
+		end
+	elseif payload == args.payload or args.payload == "*" then -- check for payload, or just update with the value
+		D(devNum, "virtualDeviceMQTTHandler: processing %1", args.topic)
 		setVar(opts.Service, opts.Variable, opts.Value or payload, args.deviceID)
+	else
+		D(devNum, "virtualDeviceMQTTHandler: ignored %1", args.topic)
 	end
 end
 
-function subscribeToMqtt(devNum, opt)
+function subscribeToMqtt(devNum, opts)
 	--local mqtt = require "openLuup.mqtt"
-	D(devNum, "subscribeToMqtt(%1,%2,%3)", devNum, opt.topic, opt)
-	luup.register_handler("virtualDeviceMQTTHandler", "mqtt:" .. opt.topic, opt)
+	D(devNum, "subscribeToMqtt(%1,%2,%3)", devNum, opts.topic, opts)
+	luup.register_handler("virtualDeviceMQTTHandler", "mqtt:" .. opts.topic, opts)
 end
 
 function initializeMqtt(devNum, opts)
@@ -364,7 +388,7 @@ function initializeMqtt(devNum, opts)
 		local mqttCommand = initVar(item.Service, "MQTT_" .. name, '', devNum)
 		if mqttCommand ~= nil and mqttCommand ~= "" then
 			local topic, payload = mqttCommand:gsub("^mqtt://", "") :match "^(.-)/=/(.+)"
-			subscribeToMqtt(devNum, {opts = item, deviceID = devNum, topic = topic, payload = payload})
+			subscribeToMqtt(devNum, {opts = item, deviceID = devNum, topic = topic, payload = payload })
 		end
 	end
 end
