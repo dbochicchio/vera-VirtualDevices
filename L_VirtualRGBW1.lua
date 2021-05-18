@@ -150,7 +150,7 @@ function actionSetColor(devNum, newVal, sendToDevice)
 	end
 	local w, c, r, g, b
 
-	local s = split(newVal, ",")
+	local s = lib.split(newVal, ",")
 
 	if (#newVal == 6 or #newVal == 7) and #s == 1 then
 		-- #RRGGBB or RRGGBB
