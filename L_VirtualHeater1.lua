@@ -39,6 +39,7 @@ function actionPower(devNum, state)
 	-- send command
 	lib.sendDeviceCommand(MYSID, state and COMMANDS_SETPOWER or COMMANDS_SETPOWEROFF, state and "on" or "off", devNum, function()
 		lib.setVar(HVACSID, "ModeStatus", state and "HeatOn" or "Off", devNum)
+		lib.setVar(SWITCHSID, "Status", state and "1" or "0", devNum)
 
 		-- update setpoint
 		local targetTemp = lib.getVarNumeric(TEMPSETPOINTSID_HEAT, "CurrentSetpoint", -1, devNum)
@@ -142,7 +143,7 @@ function virtualThermostatWatch(devNum, sid, var, oldVal, newVal)
 			if (newVal or "") == "" then newVal = "Off" end -- AltUI+Openluup bug
 		elseif var == "ModeStatus" then
 			-- update switch SID
-			lib.setVar(SWITCHSID, "Status", tostring(newVal or "") and "1" or "0", devNum)
+			lib.setVar(SWITCHSID, "Status", tostring(newVal or "") ~= "Off" and "1" or "0", devNum)
 		end
 	elseif sid == TEMPSETPOINTSID then
 		if (newVal or "") ~= "" and var == "CurrentSetpoint" and hasChanged then
