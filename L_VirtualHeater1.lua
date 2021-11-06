@@ -12,6 +12,7 @@ local HVACSID								= "urn:upnp-org:serviceId:HVAC_UserOperatingMode1"
 local HVACSTATESID							= "urn:micasaverde-com:serviceId:HVAC_OperatingState1"
 local TEMPSETPOINTSID						= "urn:upnp-org:serviceId:TemperatureSetpoint1"
 local TEMPSETPOINTSID_HEAT					= "urn:upnp-org:serviceId:TemperatureSetpoint1_Heat"
+local TEMPSETPOINTSID_COOL					= "urn:upnp-org:serviceId:TemperatureSetpoint1_Cool"
 local TEMPSENSORSSID						= "urn:upnp-org:serviceId:TemperatureSensor1"
 local HASID									= "urn:micasaverde-com:serviceId:HaDevice1"
 
@@ -20,6 +21,10 @@ local COMMANDS_SETPOWEROFF					= "SetPowerOffURL"
 local COMMANDS_SETSETPOINT					= "SetSetpointURL"
 
 -- implementation
+
+function isHeater(devNum)
+	return true -- TODO
+end
 
 -- turn on/off compatibility
 function actionPower(devNum, state)
@@ -32,29 +37,32 @@ function actionPower(devNum, state)
 		state = state ~= 0
 	end
 
+	local heating = isHeater(devNum)
 	-- update variables
 	lib.setVar(SWITCHSID, "Target", state and "1" or "0", devNum)
-	lib.setVar(HVACSTATESID, "ModeState", state and "Heating" or "Idle", devNum)
+	lib.setVar(HVACSTATESID, "ModeState", state and (heating and "Heating" or "Cooling") or "Idle", devNum)
 
 	-- send command
 	lib.sendDeviceCommand(MYSID, state and COMMANDS_SETPOWER or COMMANDS_SETPOWEROFF, state and "on" or "off", devNum, function()
-		lib.setVar(HVACSID, "ModeStatus", state and "HeatOn" or "Off", devNum)
+		lib.setVar(HVACSID, "ModeStatus", state and (heating and "HeatOn" or "CoolOn") or "Off", devNum)
 		lib.setVar(SWITCHSID, "Status", state and "1" or "0", devNum)
 
 		-- update setpoint
-		local targetTemp = lib.getVarNumeric(TEMPSETPOINTSID_HEAT, "CurrentSetpoint", -1, devNum)
+		local targetTemp = lib.getVarNumeric(heating and TEMPSETPOINTSID_HEAT or TEMPSETPOINTSID_COOL, "CurrentSetpoint", -1, devNum)
 		actionSetCurrentSetpoint(devNum, targetTemp)
 	end)
 end
 
 function updateSetpointAchieved(devNum)
+	local heating = isHeater(devNum)
 	local tNow = os.time()
 	local modeStatus, lastChanged = lib.getVar(HVACSID, "ModeStatus", "Off", devNum)
 	local temp = lib.getVarNumeric(TEMPSENSORSSID, "CurrentTemperature", 18, devNum)
-	local targetTemp = lib.getVarNumeric(TEMPSETPOINTSID_HEAT, "CurrentSetpoint", -1, devNum)
+	local targetTemp = lib.getVarNumeric(heating and TEMPSETPOINTSID_HEAT or TEMPSETPOINTSID_COOL, "CurrentSetpoint", -1, devNum)
 	
 	lastChanged = lastChanged or tNow
-	local achieved = (modeStatus == "HeatOn" and temp>targetTemp)
+	local achieved = (heating and (modeStatus == "HeatOn" and temp>targetTemp))
+					or (not heating and (modeStatus == "CoolOn" and temp<targetTemp))
 
 	lib.D(devNum, "updateSetpointAchieved(%1, %2, %3, %4, %5)", modeStatus, temp, targetTemp, achieved, lastChanged)
 
@@ -65,7 +73,7 @@ function updateSetpointAchieved(devNum)
 		lib.D(devNum, "updateSetpointAchieved: check for status: %1", (achieved and modeStatus ~= "Off"))
 
 		lib.setVar(TEMPSETPOINTSID, "SetpointAchieved", achieved and "1" or "0", devNum)
-		lib.setVar(TEMPSETPOINTSID_HEAT, "SetpointAchieved", achieved and "1" or "0", devNum)
+		lib.setVar(heating and TEMPSETPOINTSID_HEAT or TEMPSETPOINTSID_COOL, "SetpointAchieved", achieved and "1" or "0", devNum)
 
 		-- turn on if setpoint is not achieved
 --		if not achieved and modeStatus == "Off" then -- not heating, start it
@@ -74,7 +82,7 @@ function updateSetpointAchieved(devNum)
 --		end
 
 		-- setpoint achieved, turn it off
-		if achieved and modeStatus ~= "Off" then -- heating, stop it
+		if achieved and modeStatus ~= "Off" then -- heating or cooling, stop it
 			lib.L(devNum, "Turning off - achieved: %1 - status: %2", achieved, modeStatus)
 			actionPower(devNum, 0)
 		end
@@ -138,6 +146,8 @@ function virtualThermostatWatch(devNum, sid, var, oldVal, newVal)
 	local hasChanged = oldVal ~= newVal
 	devNum = tonumber(devNum)
 
+	local heating = isHeater(devNum)
+
 	if sid == HVACSID then
 		if var == "ModeTarget" then
 			if (newVal or "") == "" then newVal = "Off" end -- AltUI+Openluup bug
@@ -147,9 +157,9 @@ function virtualThermostatWatch(devNum, sid, var, oldVal, newVal)
 		end
 	elseif sid == TEMPSETPOINTSID then
 		if (newVal or "") ~= "" and var == "CurrentSetpoint" and hasChanged then
-			lib.setVar(TEMPSETPOINTSID_HEAT, "CurrentSetpoint", newVal, devNum) -- copy and keep it in sync
+			lib.setVar(heating and TEMPSETPOINTSID_HEAT or TEMPSETPOINTSID_COOL, "CurrentSetpoint", newVal, devNum) -- copy and keep it in sync
 		end
-	elseif sid == TEMPSETPOINTSID_HEAT then
+	elseif sid == TEMPSETPOINTSID_HEAT or sid == TEMPSETPOINTSID_COOL then
 		if (newVal or "") ~= "" and var == "CurrentSetpoint" and hasChanged then
 			updateSetpointAchieved(devNum)
 		end

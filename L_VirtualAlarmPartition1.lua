@@ -17,8 +17,8 @@ local COMMANDS_PANICMODE					= "SetRequestPanicModeURL"
 
 -- implementation
 local function setVerboseDisplay(devNum, line1, line2)
-	if line1 then setVar(ALTUISID, "DisplayLine1", line1 or "", devNum) end
-	if line2 then setVar(ALTUISID, "DisplayLine2", line2 or "", devNum) end
+	if line1 ~= nil then lib.setVar(ALTUISID, "DisplayLine1", line1 or "", devNum) end
+	if line2 ~= nil then lib.setVar(ALTUISID, "DisplayLine2", line2 or "", devNum) end
 end
 
 function actionRequestArmMode(devNum, state, pinCode)
@@ -28,7 +28,7 @@ function actionRequestArmMode(devNum, state, pinCode)
 	lib.sendDeviceCommand(MYSID, COMMANDS_ARM, {state or "Disarmed", pinCode or ""}, devNum, function()
 		local simpleState = state ~= "Disarmed" and "Armed" or "Disarmed"
 		lib.setVar(ALARMSID, "ArmMode", simpleState, devNum)
-		lib.setVar(ALARMSID, "DetailedArmMode", state, devNum)
+		lib.setVar(ALARMSID, "DetailedArmMode", state or simpleState, devNum)
 	end)
 end
 
@@ -48,7 +48,7 @@ function sensorWatch(devNum, sid, var, oldVal, newVal)
 	if oldVal == newVal then return end
 
 	if sid == ALARMSID then
-		if var == "Alarm" and (newVal or false) == true then
+		if var == "Alarm" and (newVal or "false") == "true" then
 			setVerboseDisplay(devNum, nil, 'Alarm: triggered')
 		elseif var == "VendorStatus" or var == "LastUser" or var == "DetailedArmMode" then
 			updateStatus(devNum)
@@ -57,9 +57,9 @@ function sensorWatch(devNum, sid, var, oldVal, newVal)
 end
 
 function updateStatus(devNum)
-	local vendorStatus = lib.getVar(ALARMSID, "VendorStatus", "", devNum)
-	local lastUser = lib.getVar(ALARMSID, "LastUser", "", devNum)
-	local state = lib.getVar(ALARMSID, "DetailedArmMode", "", devNum)
+	local vendorStatus = (lib.getVar(ALARMSID, "VendorStatus", "", devNum)) or ""
+	local lastUser = (lib.getVar(ALARMSID, "LastUser", "", devNum)) or ""
+	local state = (lib.getVar(ALARMSID, "DetailedArmMode", "", devNum)) or ""
 	local simpleState = state ~= "Disarmed" and "Armed" or "Disarmed"
 
 	setVerboseDisplay(devNum, 

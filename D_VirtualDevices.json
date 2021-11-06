@@ -1,0 +1,19 @@
+{
+	"default_icon": "zwave_default.png",
+	"Tabs": [
+		{
+			"Label": {
+				"lang_tag": "setup",
+				"text": "Setup"
+			},
+			"Position": "0",
+			"TabType": "javascript",
+			"ScriptName": "J_VirtualDevices.js",
+			"Function": "virtualDevices_Startup"
+		}
+	],
+	"eventList2": [
+
+	],
+	"DeviceType": "urn:schemas-micasaverde-com:device:ComboDevice:1"
+}

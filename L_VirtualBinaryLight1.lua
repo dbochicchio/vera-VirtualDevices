@@ -189,6 +189,8 @@ function updateMeters(devNum)
 		return x or ""
 	end
 
+	devNum = tonumber(devNum)
+
 	local meterUpdate = lib.getVarNumeric(MYSID, "MeterUpdate", 0, devNum)
 
 	if meterUpdate == 0 then
@@ -218,36 +220,39 @@ function updateMeters(devNum)
 
 				-- EXPERIMENTAL!
 				if format == 1 then -- Wmin
-					transformedValue = lib.round(lib.round(value / 60, 4) / 1000, 4) -- from Wmin to KWH
-					
 					-- special case for shellies - if value < stored value, then add value, otherwise compute delta
+					local oldValue = lib.getVarNumeric(MYSID, "KWMin", 0, devNum)
+					lib.setVar(MYSID, "KWMin", value, devNum)
+
+					transformedValue = lib.round(lib.round(value / 60, 4) / 1000, 4) -- from Wmin to KWH
 					local storedValue = lib.getVarNumeric(ENERGYMETERSID, "KWH", 0, devNum)
 					local delta = 0
 
-					if status == "0" then -- ignore reported consumption when turned off
-						lib.D(devNum, "[D] Switch is OFF")	
-						delta = 0
-						transformedValue = storedValue
-					elseif transformedValue > storedValue then
+					--if status == "0" then -- ignore reported consumption when turned off
+					--	lib.D(devNum, "[D] Switch is OFF")	
+					--	delta = 0
+					--	transformedValue = storedValue
+					--else
+					if value > oldValue then
 						delta = transformedValue - storedValue
-					elseif transformedValue < storedValue then
+					elseif value < oldValue then
 						delta = storedValue
 					end
 
-					transformedValue = transformedValue + delta
+					transformedValue = lib.round(transformedValue + delta, 2) -- round to 2
 
 					lib.D(devNum, "[updateMeters] Format %1 - Delta %2 - Original %3", format, delta, storedValue)
 				elseif format == 2 then -- WH
-					transformedValue = value / 60 -- from WH to KWH
+					transformedValue = lib.round(value / 60, 2) -- from WH to KWH
 				end
 				
-				lib.L(devNum, "[updateMeters] KWH Path %1 - Raw Value: %2 - Transformed Value: %3", kwhPath, value, transformedValue)
+				lib.L(devNum, "[updateMeters] KWH - Path %1 - Raw Value: %2 - Transformed Value: %3", kwhPath, value, transformedValue)
 				lib.setVar(ENERGYMETERSID, "KWH", lib.round(transformedValue, 4), devNum)
 			end
 
 			if wattsPath ~= "" then
 				local value = tonumber(getValue(data, wattsPath))
-				lib.L(devNum, "[updateMeters] Watts Path: %1 - Value: %2", wattsPath, value)
+				lib.L(devNum, "[updateMeters] Watts - Path: %1 - Value: %2", wattsPath, value)
 				lib.setVar(ENERGYMETERSID, "Watts", value, devNum)
 			end
 		end)
@@ -320,7 +325,10 @@ function startPlugin(devNum)
 		lib.initVar(MYSID, "MeterTotalUnit", "0", deviceID)
 		lib.initVar(MYSID, "MeterUpdate", 0, deviceID)
 
-		if commandUpdateMeters ~= lib.DEFAULT_ENDPOINT then updateMeters(deviceID) end
+		if commandUpdateMeters ~= lib.DEFAULT_ENDPOINT then
+			-- start updating meters after 4 secs
+			luup.call_delay("updateMeters", 4, deviceID)
+		end
 
 		local category_num = luup.attr_get("category_num", deviceID) or 0
 		-- set at first run, then make it configurable

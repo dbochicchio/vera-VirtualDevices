@@ -5,8 +5,8 @@
 		<minor>0</minor>
 	</specVersion>
 	<device>
-		<deviceType>urn:schemas-micasaverde-com:device:DoorSensor:1</deviceType>
-		<staticJson>D_DoorSensor1.json</staticJson>
+		<deviceType>urn:schemas-micasaverde-com:device:SmokeSensor:1</deviceType>
+		<staticJson>D_SmokeSensor1.json</staticJson>
 		<handleChildren>1</handleChildren>
 		<serviceList>
 			<service>

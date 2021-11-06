@@ -63,8 +63,8 @@
 			},
 			"Position": "1",
 			"TabType": "javascript",
-			"ScriptName": "shared.js",
-			"Function": "simple_device"
+			"ScriptName": "J_VirtualDevices.js",
+			"Function": "virtualDevices_Startup"
 		},
 		{
 			"Label": {
