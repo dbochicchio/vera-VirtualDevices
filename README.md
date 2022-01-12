@@ -1,5 +1,5 @@
 # Virtual Devices plug-in for Vera and openLuup
-This plug-in intented to provide support for Virtual Devices that performs their actions using HTTP calls, lua code or MQTT messages (openLuup only).
+This plug-in intented to provide support for Virtual Devices that performs their actions using HTTP calls, lua code (both Vera and openLuup) or MQTT messages (openLuup only).
 
 It's intended to be used with Tasmota, Shelly or any similar device, or with a companion hub (Home Assistant, domoticz, Zway Server, etc).
 This could be used to simulate the entire set of options, still using a native interface and native services, with 100% compatibility to external plug-ins or code.
@@ -17,7 +17,7 @@ To create a new device under Vera, go to *Apps*, then *Develop Apps* and *Create
 
 If you're under openLuup, you'd already know how to do ;)
 
-App Store is recommended for stable version, but you'll find new features on GitHub first.
+MiOS App Store (when working...) is recommended for stable version, but you'll find new features on GitHub first.
 
 # Async HTTP support (version 1.5+)
 Version 1.5 introduced support for async HTTP calls. This will make your device faster, because it's not blocking until the HTTP call is completed.
@@ -68,22 +68,21 @@ lua://yourluacode()
 This is useful to execute code in your libraries. All the commands are supported.
 
 # MQTT support (version 3.0+)
-Starting with version 3.0, MQTT messages could be triggered, on openLuup only (be sure to install the latest development version od openLuup).
+Starting with version 3.0, MQTT messages could be triggered, on openLuup only (be sure to install the latest development version of openLuup).
 
 Use this format:
 ```
 mqtt://topic/=/message
 ```
-
-If:
-- your command topic is *shellies/myshelly/relay/0/command*
-- your topic value is *on*
-
-just use:
+I.e. use:
 
 ```
 mqtt://shellies/myshelly/relay/0/command/=/on
 ```
+
+if:
+- your command topic is *shellies/myshelly/relay/0/command*
+- your topic value is *on*
 
 All the commands are supported on all devices.
 
@@ -104,9 +103,7 @@ shellies/shelly-rain/input/0/+/0
 
 you can set the corresponding status when a message in topic *shellies/shelly-rain/input/0/* is sent with a value of *0*.
 
-To pass the value to the corresponding variable, just specificy "*" as *value*.
-
-Here's an example to get the value from a topic:
+To pass the value to the corresponding variable, just specificy "*" as *value* instead of *0*, as in the previous example:
 
 ```
 shellies/shelly-rain/ext_temperature/0/+/*
@@ -119,7 +116,7 @@ On AltUI use code to modify it (UI doesn't support multi-line values). openLuup 
 
 You can specify only HTTP calls.
 
-> Remarks: multiple commands will slow down your system. Do not exceed 3-4 commands per action. Async HTTP are strongly suggested, because they will not block the execution and nicely run in parallel.
+> Remarks: multiple commands will slow down your system. Do not exceed 3-4 commands per action. Async HTTP is strongly suggested, because it will not block the execution and calls will be nicely run in parallel.
 
 # Create a new device
 To create a new device, open your Vera web GUI, go to *Apps*, then *Develop Apps*, then *Create device*.

@@ -23,7 +23,7 @@ local COMMANDS_SETSETPOINT					= "SetSetpointURL"
 -- implementation
 
 function isHeater(devNum)
-	return true -- TODO
+	return true -- TODO: look at current state
 end
 
 -- turn on/off compatibility
@@ -38,17 +38,18 @@ function actionPower(devNum, state)
 	end
 
 	local heating = isHeater(devNum)
+	
 	-- update variables
-	lib.setVar(SWITCHSID, "Target", state and "1" or "0", devNum)
-	lib.setVar(HVACSTATESID, "ModeState", state and (heating and "Heating" or "Cooling") or "Idle", devNum)
+	lib.setVar(SWITCHSID, "Target", (state and "1" or "0"), devNum)
+	lib.setVar(HVACSTATESID, "ModeState", (state and (heating and "Heating" or "Cooling") or "Idle"), devNum)
 
 	-- send command
 	lib.sendDeviceCommand(MYSID, state and COMMANDS_SETPOWER or COMMANDS_SETPOWEROFF, state and "on" or "off", devNum, function()
-		lib.setVar(HVACSID, "ModeStatus", state and (heating and "HeatOn" or "CoolOn") or "Off", devNum)
-		lib.setVar(SWITCHSID, "Status", state and "1" or "0", devNum)
+		lib.setVar(HVACSID, "ModeStatus", (state and (heating and "HeatOn" or "CoolOn") or "Off"), devNum)
+		lib.setVar(SWITCHSID, "Status", (state and "1" or "0"), devNum)
 
 		-- update setpoint
-		local targetTemp = lib.getVarNumeric(heating and TEMPSETPOINTSID_HEAT or TEMPSETPOINTSID_COOL, "CurrentSetpoint", -1, devNum)
+		local targetTemp = lib.getVarNumeric((heating and TEMPSETPOINTSID_HEAT or TEMPSETPOINTSID_COOL), "CurrentSetpoint", -1, devNum)
 		actionSetCurrentSetpoint(devNum, targetTemp)
 	end)
 end
@@ -58,7 +59,7 @@ function updateSetpointAchieved(devNum)
 	local tNow = os.time()
 	local modeStatus, lastChanged = lib.getVar(HVACSID, "ModeStatus", "Off", devNum)
 	local temp = lib.getVarNumeric(TEMPSENSORSSID, "CurrentTemperature", 18, devNum)
-	local targetTemp = lib.getVarNumeric(heating and TEMPSETPOINTSID_HEAT or TEMPSETPOINTSID_COOL, "CurrentSetpoint", -1, devNum)
+	local targetTemp = lib.getVarNumeric((heating and TEMPSETPOINTSID_HEAT or TEMPSETPOINTSID_COOL), "CurrentSetpoint", -1, devNum)
 	
 	lastChanged = lastChanged or tNow
 	local achieved = (heating and (modeStatus == "HeatOn" and temp>targetTemp))
@@ -73,7 +74,7 @@ function updateSetpointAchieved(devNum)
 		lib.D(devNum, "updateSetpointAchieved: check for status: %1", (achieved and modeStatus ~= "Off"))
 
 		lib.setVar(TEMPSETPOINTSID, "SetpointAchieved", achieved and "1" or "0", devNum)
-		lib.setVar(heating and TEMPSETPOINTSID_HEAT or TEMPSETPOINTSID_COOL, "SetpointAchieved", achieved and "1" or "0", devNum)
+		lib.setVar((heating and TEMPSETPOINTSID_HEAT or TEMPSETPOINTSID_COOL), "SetpointAchieved", achieved and "1" or "0", devNum)
 
 		-- turn on if setpoint is not achieved
 --		if not achieved and modeStatus == "Off" then -- not heating, start it
@@ -93,10 +94,15 @@ end
 
 -- change setpoint
 function actionSetCurrentSetpoint(devNum, newSetPoint)
+	local heating = isHeater(devNum)
 	local modeStatus = lib.getVar(HVACSID, "ModeStatus", "Off", devNum)
 	local modeState = lib.getVar(HVACSTATESID, "ModeState", "Off", devNum)
 
 	lib.D(devNum, "actionSetCurrentSetpoint(%1,%2,%3,%4)", devNum, newSetPoint, modeStatus, modeState)
+	lib.setVar(TEMPSETPOINTSID, "SetpointTarget", newSetPoint, devNum)
+	lib.setVar((heating and TEMPSETPOINTSID_HEAT or TEMPSETPOINTSID_COOL), "SetpointTarget", newSetPoint, devNum)
+	-- TODO: differentiate setpoints - format: HEAT,COOL,AUTO
+	lib.setVar(TEMPSETPOINTSID, "AllSetpoints", string.format("%s,%s,%s", newSetPoint, newSetPoint, newSetPoint), devNum)
 
 	if modeStatus == "Off" or modeState == "Idle" then
 		-- on off/idle, just ignore?
@@ -108,6 +114,7 @@ function actionSetCurrentSetpoint(devNum, newSetPoint)
 		lib.sendDeviceCommand(MYSID, COMMANDS_SETSETPOINT, newSetPoint, devNum, function()
 			-- just set variable, watch will do the real work
 			lib.setVar(TEMPSETPOINTSID, "CurrentSetpoint", newSetPoint, devNum)
+			lib.setVar((heating and TEMPSETPOINTSID_HEAT or TEMPSETPOINTSID_COOL), "CurrentSetpoint", newSetPoint, devNum)
 		end)
 	end
 end
@@ -157,7 +164,7 @@ function virtualThermostatWatch(devNum, sid, var, oldVal, newVal)
 		end
 	elseif sid == TEMPSETPOINTSID then
 		if (newVal or "") ~= "" and var == "CurrentSetpoint" and hasChanged then
-			lib.setVar(heating and TEMPSETPOINTSID_HEAT or TEMPSETPOINTSID_COOL, "CurrentSetpoint", newVal, devNum) -- copy and keep it in sync
+			lib.setVar((heating and TEMPSETPOINTSID_HEAT or TEMPSETPOINTSID_COOL), "CurrentSetpoint", newVal, devNum) -- copy and keep it in sync
 		end
 	elseif sid == TEMPSETPOINTSID_HEAT or sid == TEMPSETPOINTSID_COOL then
 		if (newVal or "") ~= "" and var == "CurrentSetpoint" and hasChanged then
@@ -199,17 +206,21 @@ function startPlugin(devNum)
 		lib.initVar(SWITCHSID, "Target", "0", deviceID)
 		lib.initVar(SWITCHSID, "Status", "0", deviceID)
 
-		-- heater init
+		-- heater/cooler init
 		lib.initVar(HVACSID, "ModeStatus", "Off", deviceID)
 		lib.initVar(TEMPSETPOINTSID, "CurrentSetpoint", "18", deviceID)
 		lib.initVar(TEMPSETPOINTSID_HEAT, "CurrentSetpoint", "18", deviceID)
+		lib.initVar(TEMPSETPOINTSID_COOL, "CurrentSetpoint", "18", deviceID)
+		lib.initVar(TEMPSETPOINTSID, "SetpointTarget", "18", deviceID)
+		lib.initVar(TEMPSETPOINTSID_HEAT, "SetpointTarget", "18", deviceID)
+		lib.initVar(TEMPSETPOINTSID_COOL, "SetpointTarget", "18", deviceID)
 		lib.initVar(TEMPSENSORSSID, "CurrentTemperature", "18", deviceID)
 		lib.initVar(MYSID, "TemperatureDevice", "0", deviceID)
 
 		-- commands init
-		lib.initVar(MYSID, COMMANDS_SETPOWER, lib.DEFAULT_ENDPOINT, deviceID)
-		lib.initVar(MYSID, COMMANDS_SETPOWEROFF, lib.DEFAULT_ENDPOINT, deviceID)
-		lib.initVar(MYSID, COMMANDS_SETSETPOINT, lib.DEFAULT_ENDPOINT, deviceID)
+		local powerOnCommand = lib.initVar(MYSID, COMMANDS_SETPOWER, lib.DEFAULT_ENDPOINT, deviceID)
+		local powerOffCommand = lib.initVar(MYSID, COMMANDS_SETPOWEROFF, lib.DEFAULT_ENDPOINT, deviceID)
+		local setpointCommand = lib.initVar(MYSID, COMMANDS_SETSETPOINT, lib.DEFAULT_ENDPOINT, deviceID)
 
 		-- set at first run, then make it configurable
 		if luup.attr_get("category_num", deviceID) == nil then
@@ -223,12 +234,18 @@ function startPlugin(devNum)
 			luup.attr_set("subcategory_num", "2", deviceID) -- heater
 		end
 
-		-- watches
-		luup.variable_watch("virtualThermostatWatch", HVACSID, "ModeTarget", deviceID)
-		luup.variable_watch("virtualThermostatWatch", HVACSID, "ModeStatus", deviceID)
+		-- watches, if necessary
+		if powerOnCommand ~= "skip" and powerOffCommand ~= "skip" then
+			luup.variable_watch("virtualThermostatWatch", HVACSID, "ModeTarget", deviceID)
+			luup.variable_watch("virtualThermostatWatch", HVACSID, "ModeStatus", deviceID)
+		end
+
 		luup.variable_watch("virtualThermostatWatch", TEMPSETPOINTSID, "CurrentSetpoint", deviceID)
-		luup.variable_watch("virtualThermostatWatch", TEMPSETPOINTSID_HEAT, "CurrentSetpoint", deviceID)
-		luup.variable_watch("virtualThermostatWatch", TEMPSENSORSSID, "CurrentTemperature", deviceID)
+
+		if setpointCommand ~= "skip" then
+			luup.variable_watch("virtualThermostatWatch", TEMPSETPOINTSID_HEAT, "CurrentSetpoint", deviceID)
+			luup.variable_watch("virtualThermostatWatch", TEMPSETPOINTSID_COOL, "CurrentSetpoint", deviceID)
+		end
 
 		-- external temp sensor
 		local temperatureDeviceID = lib.getVarNumeric(MYSID, "TemperatureDevice", 0, deviceID)
@@ -240,6 +257,7 @@ function startPlugin(devNum)
 			lib.setVar(MYSID, "ThermostatDevice", deviceID, nil) -- updgrade code
 
 			luup.variable_watch("virtualThermostatWatchSync", TEMPSENSORSSID, "CurrentTemperature", temperatureDeviceID)
+			luup.variable_watch("virtualThermostatWatch", TEMPSENSORSSID, "CurrentTemperature", deviceID)
 		end
 
 		-- MQTT

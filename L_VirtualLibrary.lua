@@ -7,7 +7,7 @@
 module("L_VirtualLibrary", package.seeall)
 
 _PLUGIN_NAME = "VirtualDevices"
-_PLUGIN_VERSION = "3.0-beta5"
+_PLUGIN_VERSION = "3.0-beta6"
 
 DEFAULT_ENDPOINT						= "http://"
 local MYSID								= ""
