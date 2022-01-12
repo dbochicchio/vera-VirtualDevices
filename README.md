@@ -167,12 +167,13 @@ Many different devices could be mapped with this service.
 > **Remarks**: if your light only supports RGB, please change *SupportedColor* variable to *R,G,B*. By default it's set to *W,D,R,G,B* to support white channels.
 > The device will be automatically configured to category 2, subcategory 4 (RGB).
 
-### Heaters
-- Upnp Device Filename/Device File (2.0+, master/children mode): *D_VirtualHeater1.xml*
+### Heaters and Thermostats
+- Upnp Device Filename/Device File (2.0+, master/children mode): *D_VirtualHeater1.xml* or *D_VirtualThermostat1.xml*
 - Upnp Device Filename/Device File (legacy mode): *D_Heater1.xml*
 - Upnp Implementation Filename/Implementation file: *I_VirtualHeater1.xml*
 
 The device will emulate a basic Heater, and turn on or off the associated device, translating the actions to a virtual thermostat handler.
+If you use *D_VirtualThermostat1.xml*/*D_VirtualThermostat1.json*, you'll get a complete thermostat UI.
 
 Temperature setpoints are supported via specific commands. Experimental setpoints support is added.
 
