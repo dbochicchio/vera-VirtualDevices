@@ -325,7 +325,8 @@ No params required.
 If omitted (blank value or `http://`), the device will try to change the status according to current local status as reported by *Status* variable. (1.5.1+).
 
 #### Dimming (Dimmers, RGB Lights, Window Covers/Roller Shutters/Blinds)
-Set *SetBrightnessURL* variable to the corresponding HTTP call.
+Set *SetBrigthnessURL* variable to the corresponding HTTP call.
+- For Shelly: ```http://mydevice/light/0?brightness=%s```
 - For a custom device: ```http://mydevice/brigthness?v=%s```
 
 The %s parameter will be replaced with the desired dimming (0/100) value. Leave `http://` or blank if not supported.
