@@ -293,6 +293,9 @@ There's no limit to how many children a master could handle.
 
 It's suggested to have one master per controller and how many children you want.
 
+#### Skip actions
+If you don't want to execute an action, set the corresponding variable to blank, `skip` or `http://`.
+
 #### Switch On/Off (All)
 
 > **Attention: `%` in your URL must be escaped, so you need to double them. ie `Power%20On` must be set as `Power%%20On`.*
@@ -313,7 +316,7 @@ The *%s* parameter will be replace with *On*/*Off* (this very same case), based 
 You can now specify an auto off timer (in seconds) to automatically turn off a light after a given amount of time.
 The corresponding variable is *AutoOff*.
 
-If you want to implement auto inching and you don't need to call the Off endpoint, just specify `skip` as *SetPowerOffURL* variable.
+If you want to implement auto inching and you don't need to call the Off endpoint, just specify `skip` (or one of the skipped values) as *SetPowerOffURL* variable.
 This will just update the status and no HTTP calls will be made.
 
 #### Toggle (All)
@@ -329,10 +332,10 @@ Set *SetBrigthnessURL* variable to the corresponding HTTP call.
 - For Shelly: ```http://mydevice/light/0?brightness=%s```
 - For a custom device: ```http://mydevice/brigthness?v=%s```
 
-The %s parameter will be replaced with the desired dimming (0/100) value. Leave `http://` or blank if not supported.
+The %s parameter will be replaced with the desired dimming (0/100) value. Set to one of the skipped values if not supported (ie: you want to monitor only the value).
 
 ##### Binary Window Covers/Roller Shutters/Blinds (2.40+)
-If you want to emulate a Window Cover/Roller Shutter/Blind but your device is supporting only ON/OFF commands, simply leave *SetBrightnessURL* to its default (`http://`).
+If you want to emulate a Window Cover/Roller Shutter/Blind but your device is supporting only ON/OFF commands, simply leave *SetBrightnessURL* to one of the skipped values.
 
 Then go to the device's variable and set *BlindAsSwitch* to 1. The device will now work as follows:
 - when position is set to a value between 0 and 50, or down/close buttons are pressed, the switch off command is sent
@@ -408,7 +411,7 @@ http://*veraip*:3480/data_request?id=variableset&DeviceNum=6&serviceId=urn:micas
 http://*veraip*/port_3480/data_request?id=variableset&DeviceNum=6&serviceId=urn:micasaverde-com:serviceId:Color1&Variable=CurrentColor&Value=0=0,1=0,2=255,3=0,4=0
 ```
 
-If you cannot use a long URL like this, you can place a custom handler in your startup code:
+If you can't use a long URL like the previous ones, you can place a custom handler in your startup code:
 ```
  -- http://ip:3480/data_request?id=lr_updateSwitch&device=170&status=0
 function lr_updateSwitch(lul_request, lul_parameters, lul_outputformat)
@@ -420,7 +423,7 @@ end
 luup.register_handler("lr_updateSwitch", "updateSwitch")
 ```
 
-This can be called with a short URL like this:
+The custom handler can be called with a short URL like this one:
 ```
 http://*veraip*:3480/data_request?id=lr_updateSwitch&device=214&status=0
 ```
@@ -460,6 +463,11 @@ Rule1
 Be sure to insert both *devID* and *VeraIP* according to your settings
 
 [More info on Tasmota docs.](https://tasmota.github.io/docs/Rules/)
+
+### Update your Vera/openLuup status with Shelly I/O actions
+When using Shelly, you can directly call the Vera/openLuup's endpoints to update the variables using Shelly I/O actions. These actions are used to call HTTP endpoints when an event occurs.
+
+Even if very basic compared to Tasmota's scripting features, this is useful to avoid running code on your Vera to just updated the status of your virtual devices.
 
 ### Ping device for status
 If you want to ping a device and have its status associated to the virtual device, you can write a simple scene like this, to be executed every *x* minutes.
