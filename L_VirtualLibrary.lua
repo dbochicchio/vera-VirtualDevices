@@ -7,11 +7,7 @@
 module("L_VirtualLibrary", package.seeall)
 
 _PLUGIN_NAME = "VirtualDevices"
-<<<<<<< HEAD
-_PLUGIN_VERSION = "3.0-beta6"
-=======
-_PLUGIN_VERSION = "3.0-beta6"
->>>>>>> 9606d7035cfc037dd8749e5aae9c51052b7af873
+_PLUGIN_VERSION = "3.0-beta7"
 
 DEFAULT_ENDPOINT						= "http://"
 local MYSID								= ""
@@ -143,6 +139,18 @@ function round(num, numDecimalPlaces)
 	return math.floor(num * mult + 0.5) / mult
 end
 
+function count(base, pattern)
+	local _, count = string.gsub(base, pattern, " ")
+    return count
+end
+
+function unpack (t, i)
+	i = i or 1
+	if t[i] ~= nil then
+		return t[i], unpack(t, i + 1)
+	end
+end
+
 -- Array to map, where f(elem) returns key[,value]
 function map(arr, f, res)
 	res = res or {}
@@ -164,6 +172,18 @@ function initVar(sid, name, dflt, devNum)
 		return tostring(dflt)
 	end
 	return currVal
+end
+
+function scaleDimming(devNum, bri)
+	local scale = lib.getVarNumeric(MYSID, "DimmingScale", 100, devNum)
+
+	-- reactor: 0...1
+	if scale == 1 then
+		return = bri / 100
+	end
+
+	-- normal: 0...100
+	return bri
 end
 
 function deviceMessage(devNum, message, error, timeout)
@@ -342,7 +362,14 @@ function sendDeviceCommand(MYSID, cmd, params, devNum, onSuccess)
 		for _, url in pairs(urls) do
 			D(devNum, "sendDeviceCommand.url(%1)", url)
 			if #trim(url) > 0 then
-				httpGet(devNum, string.format(url, pstr), onSuccess)
+
+				-- explicit params
+				if (type(params) == "table" and #params>0 and #params == count(url, "%%s")) then
+					httpGet(devNum, string.format(url, unpack(params)), onSuccess)
+				else
+					-- concatenated params
+					httpGet(devNum, string.format(url, pstr), onSuccess)
+				end
 			end
 		end
 	end
