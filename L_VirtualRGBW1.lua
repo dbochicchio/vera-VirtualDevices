@@ -29,7 +29,8 @@ local function restoreBrightness(devNum)
 		lib.setVar(DIMMERSID, "LoadLevelTarget", brightness, devNum)
 		lib.setVar(DIMMERSID, "LoadLevelLast", brightness, devNum)
 
-		lib.sendDeviceCommand(MYSID, COMMANDS_SETBRIGHTNESS, brightness, devNum, function()
+		local newBrightness = lib.scaleDimming(devNum, brightness)
+		lib.sendDeviceCommand(MYSID, COMMANDS_SETBRIGHTNESS, newBrightness, devNum, function()
 			lib.setVar(DIMMERSID, "LoadLevelStatus", brightness, devNum)
 		end)
 	end
@@ -85,7 +86,9 @@ function actionBrightness(devNum, newVal)
 				lib.setVar(SWITCHSID, "Status", 1, devNum)
 			end)
 		end
-		lib.sendDeviceCommand(MYSID, COMMANDS_SETBRIGHTNESS, newVal, devNum, function()
+
+		local brightness = lib.scaleDimming(devNum, newVal)
+		lib.sendDeviceCommand(MYSID, COMMANDS_SETBRIGHTNESS, brightness, devNum, function()
 			lib.setVar(DIMMERSID, "LoadLevelStatus", newVal, devNum)
 		end)
 	elseif lib.getVarNumeric(DIMMERSID, "AllowZeroLevel", 0, devNum) ~= 0 then
@@ -305,6 +308,8 @@ function startPlugin(devNum)
 		-- TODO: white mode scale?
 		lib.initVar(MYSID, "MinTemperature", "2000", deviceID)
 		lib.initVar(MYSID, "MaxTemperature", "6500", deviceID)
+
+		lib.initVar(MYSID, "DimmingScale", "100", deviceID)
 
 		lib.initVar(MYSID, COMMANDS_SETBRIGHTNESS, lib.DEFAULT_ENDPOINT, deviceID)
 		lib.initVar(MYSID, COMMANDS_SETWHITETEMPERATURE, lib.DEFAULT_ENDPOINT, deviceID)

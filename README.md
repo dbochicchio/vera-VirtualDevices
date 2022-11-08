@@ -333,6 +333,7 @@ Set *SetBrigthnessURL* variable to the corresponding HTTP call.
 - For a custom device: ```http://mydevice/brigthness?v=%s```
 
 The %s parameter will be replaced with the desired dimming (0/100) value. Set to one of the skipped values if not supported (ie: you want to monitor only the value).
+If you want to use a 0/1 scale, please set *DimmingScale* variable to 1 (default: 100).
 
 ##### Binary Window Covers/Roller Shutters/Blinds (2.40+)
 If you want to emulate a Window Cover/Roller Shutter/Blind but your device is supporting only ON/OFF commands, simply leave *SetBrightnessURL* to one of the skipped values.
@@ -345,13 +346,13 @@ Then go to the device's variable and set *BlindAsSwitch* to 1. The device will n
 Set *SetRGBColorURL* variable to the corresponding HTTP call.
 - For a custom device: ```http://mydevice/setcolor?v=%s```
 
-The %s parameter will be replace with the RBG color.
+The %s parameter will be replace with the RBG color. Leave `http://` or blank if not supported.
 
 #### White Temperature (RGB Lights)
 Set *SetWhiteTemperatureURL* variable to the corresponding HTTP call.
  - For a custom device: ```http://mydevice/setwhitemode?v=%s```
 
-The %s parameter will be replace with temperature (from 2000 to 6500 k). Leave `http://` or blank if not supported
+The %s parameter will be replace with temperature (from 2000 to 6500 k). Leave `http://` or blank if not supported.
 
 #### Sensors
 - Set *SetTrippedURL* variable to the corresponding HTTP call (to trip).

@@ -27,8 +27,10 @@ local function restoreBrightness(devNum)
 	local brightnessCurrent = lib.getVarNumeric(DIMMERSID, "LoadLevelStatus", 0, devNum)
 
 	if brightness > 0 and brightnessCurrent ~= brightness then
-		lib.setVar(DIMMERSID, "LoadLevelTarget", brightness, devNum)	
-		lib.sendDeviceCommand(MYSID, COMMANDS_SETBRIGHTNESS, brightness, devNum, function()
+		lib.setVar(DIMMERSID, "LoadLevelTarget", brightness, devNum)
+
+		local newBrightness = lib.scaleDimming(devNum, brightness)
+		lib.sendDeviceCommand(MYSID, COMMANDS_SETBRIGHTNESS, newBrightness, devNum, function()
 			lib.setVar(DIMMERSID, "LoadLevelStatus", brightness, devNum)
 		end)
 	end
@@ -133,7 +135,8 @@ function actionBrightness(devNum, newVal)
 				end
 			end
 
-			lib.sendDeviceCommand(MYSID, COMMANDS_SETBRIGHTNESS, newVal, devNum, function()
+			local newBrightness = lib.scaleDimming(devNum, newVal)
+			lib.sendDeviceCommand(MYSID, COMMANDS_SETBRIGHTNESS, newBrightness, devNum, function()
 				lib.setVar(DIMMERSID, "LoadLevelStatus", newVal, devNum)
 			end)
 		elseif newVal == 0 and lib.getVarNumeric(DIMMERSID, "AllowZeroLevel", 0, devNum) ~= 0 then
@@ -289,6 +292,7 @@ function startPlugin(devNum)
 
 			lib.initVar(MYSID, COMMANDS_SETBRIGHTNESS, lib.DEFAULT_ENDPOINT, deviceID)
 			lib.initVar(MYSID, "AutoOff", "0", deviceID)
+			lib.initVar(MYSID, "DimmingScale", "100", deviceID)
 
 		elseif deviceType == "D_WindowCovering1.xml" or deviceType == "D_VirtualWindowCovering1.xml" then
 			-- roller shutter
@@ -300,6 +304,7 @@ function startPlugin(devNum)
 			lib.initVar(MYSID, COMMANDS_SETBRIGHTNESS, lib.DEFAULT_ENDPOINT, deviceID)
 			lib.initVar(MYSID, COMMANDS_MOVESTOP, lib.DEFAULT_ENDPOINT, deviceID)
 			lib.initVar(MYSID, "BlindAsSwitch", 0, deviceID)
+			lib.initVar(MYSID, "DimmingScale", "100", deviceID)
 		else
 			-- binary light
 			lib.setVar(DIMMERSID, "LoadLevelTarget", nil, deviceID)
@@ -311,6 +316,7 @@ function startPlugin(devNum)
 
 			lib.setVar(MYSID, COMMANDS_SETBRIGHTNESS, nil, deviceID)
 			lib.initVar(MYSID, "AutoOff", "0", deviceID)
+			lib.initVar(MYSID, "DimmingScale", "100", deviceID)
 		end
 
 		-- normal switch
