@@ -1,5 +1,5 @@
 # Virtual Devices plug-in for Vera and openLuup
-This plug-in intented to provide support for Virtual Devices that performs their actions using HTTP calls, lua code or MQTT messages (openLuup only).
+This plug-in intented to provide support for Virtual Devices that performs their actions using HTTP calls, lua code (both Vera and openLuup) or MQTT messages (openLuup only).
 
 It's intended to be used with Tasmota, Shelly or any similar device, or with a companion hub (Home Assistant, domoticz, Zway Server, etc).
 This could be used to simulate the entire set of options, still using a native interface and native services, with 100% compatibility to external plug-ins or code.
@@ -17,7 +17,7 @@ To create a new device under Vera, go to *Apps*, then *Develop Apps* and *Create
 
 If you're under openLuup, you'd already know how to do ;)
 
-App Store is recommended for stable version, but you'll find new features on GitHub first.
+MiOS App Store (when working...) is recommended for stable version, but you'll find new features on GitHub first.
 
 # Async HTTP support (version 1.5+)
 Version 1.5 introduced support for async HTTP calls. This will make your device faster, because it's not blocking until the HTTP call is completed.
@@ -68,22 +68,21 @@ lua://yourluacode()
 This is useful to execute code in your libraries. All the commands are supported.
 
 # MQTT support (version 3.0+)
-Starting with version 3.0, MQTT messages could be triggered, on openLuup only (be sure to install the latest development version od openLuup).
+Starting with version 3.0, MQTT messages could be triggered, on openLuup only (be sure to install the latest development version of openLuup).
 
 Use this format:
 ```
 mqtt://topic/=/message
 ```
-
-If:
-- your command topic is *shellies/myshelly/relay/0/command*
-- your topic value is *on*
-
-just use:
+I.e. use:
 
 ```
 mqtt://shellies/myshelly/relay/0/command/=/on
 ```
+
+if:
+- your command topic is *shellies/myshelly/relay/0/command*
+- your topic value is *on*
 
 All the commands are supported on all devices.
 
@@ -104,9 +103,7 @@ shellies/shelly-rain/input/0/+/0
 
 you can set the corresponding status when a message in topic *shellies/shelly-rain/input/0/* is sent with a value of *0*.
 
-To pass the value to the corresponding variable, just specificy "*" as *value*.
-
-Here's an example to get the value from a topic:
+To pass the value to the corresponding variable, just specificy "*" as *value* instead of *0*, as in the previous example:
 
 ```
 shellies/shelly-rain/ext_temperature/0/+/*
@@ -119,7 +116,7 @@ On AltUI use code to modify it (UI doesn't support multi-line values). openLuup 
 
 You can specify only HTTP calls.
 
-> Remarks: multiple commands will slow down your system. Do not exceed 3-4 commands per action. Async HTTP are strongly suggested, because they will not block the execution and nicely run in parallel.
+> Remarks: multiple commands will slow down your system. Do not exceed 3-4 commands per action. Async HTTP is strongly suggested, because it will not block the execution and calls will be nicely run in parallel.
 
 # Create a new device
 To create a new device, open your Vera web GUI, go to *Apps*, then *Develop Apps*, then *Create device*.
@@ -170,12 +167,13 @@ Many different devices could be mapped with this service.
 > **Remarks**: if your light only supports RGB, please change *SupportedColor* variable to *R,G,B*. By default it's set to *W,D,R,G,B* to support white channels.
 > The device will be automatically configured to category 2, subcategory 4 (RGB).
 
-### Heaters
-- Upnp Device Filename/Device File (2.0+, master/children mode): *D_VirtualHeater1.xml*
+### Heaters and Thermostats
+- Upnp Device Filename/Device File (2.0+, master/children mode): *D_VirtualHeater1.xml* or *D_VirtualThermostat1.xml*
 - Upnp Device Filename/Device File (legacy mode): *D_Heater1.xml*
 - Upnp Implementation Filename/Implementation file: *I_VirtualHeater1.xml*
 
 The device will emulate a basic Heater, and turn on or off the associated device, translating the actions to a virtual thermostat handler.
+If you use *D_VirtualThermostat1.xml*/*D_VirtualThermostat1.json*, you'll get a complete thermostat UI.
 
 Temperature setpoints are supported via specific commands. Experimental setpoints support is added.
 
@@ -295,6 +293,9 @@ There's no limit to how many children a master could handle.
 
 It's suggested to have one master per controller and how many children you want.
 
+#### Skip actions
+If you don't want to execute an action, set the corresponding variable to blank, `skip` or `http://`.
+
 #### Switch On/Off (All)
 
 > **Attention: `%` in your URL must be escaped, so you need to double them. ie `Power%20On` must be set as `Power%%20On`.*
@@ -315,7 +316,7 @@ The *%s* parameter will be replace with *On*/*Off* (this very same case), based 
 You can now specify an auto off timer (in seconds) to automatically turn off a light after a given amount of time.
 The corresponding variable is *AutoOff*.
 
-If you want to implement auto inching and you don't need to call the Off endpoint, just specify `skip` as *SetPowerOffURL* variable.
+If you want to implement auto inching and you don't need to call the Off endpoint, just specify `skip` (or one of the skipped values) as *SetPowerOffURL* variable.
 This will just update the status and no HTTP calls will be made.
 
 #### Toggle (All)
@@ -327,13 +328,14 @@ No params required.
 If omitted (blank value or `http://`), the device will try to change the status according to current local status as reported by *Status* variable. (1.5.1+).
 
 #### Dimming (Dimmers, RGB Lights, Window Covers/Roller Shutters/Blinds)
-Set *SetBrightnessURL* variable to the corresponding HTTP call.
+Set *SetBrigthnessURL* variable to the corresponding HTTP call.
+- For Shelly: ```http://mydevice/light/0?brightness=%s```
 - For a custom device: ```http://mydevice/brigthness?v=%s```
 
-The %s parameter will be replaced with the desired dimming (0/100) value. Leave `http://` or blank if not supported.
+The %s parameter will be replaced with the desired dimming (0/100) value. Set to one of the skipped values if not supported (ie: you want to monitor only the value).
 
 ##### Binary Window Covers/Roller Shutters/Blinds (2.40+)
-If you want to emulate a Window Cover/Roller Shutter/Blind but your device is supporting only ON/OFF commands, simply leave *SetBrightnessURL* to its default (`http://`).
+If you want to emulate a Window Cover/Roller Shutter/Blind but your device is supporting only ON/OFF commands, simply leave *SetBrightnessURL* to one of the skipped values.
 
 Then go to the device's variable and set *BlindAsSwitch* to 1. The device will now work as follows:
 - when position is set to a value between 0 and 50, or down/close buttons are pressed, the switch off command is sent
@@ -409,7 +411,7 @@ http://*veraip*:3480/data_request?id=variableset&DeviceNum=6&serviceId=urn:micas
 http://*veraip*/port_3480/data_request?id=variableset&DeviceNum=6&serviceId=urn:micasaverde-com:serviceId:Color1&Variable=CurrentColor&Value=0=0,1=0,2=255,3=0,4=0
 ```
 
-If you cannot use a long URL like this, you can place a custom handler in your startup code:
+If you can't use a long URL like the previous ones, you can place a custom handler in your startup code:
 ```
  -- http://ip:3480/data_request?id=lr_updateSwitch&device=170&status=0
 function lr_updateSwitch(lul_request, lul_parameters, lul_outputformat)
@@ -421,7 +423,7 @@ end
 luup.register_handler("lr_updateSwitch", "updateSwitch")
 ```
 
-This can be called with a short URL like this:
+The custom handler can be called with a short URL like this one:
 ```
 http://*veraip*:3480/data_request?id=lr_updateSwitch&device=214&status=0
 ```
@@ -461,6 +463,11 @@ Rule1
 Be sure to insert both *devID* and *VeraIP* according to your settings
 
 [More info on Tasmota docs.](https://tasmota.github.io/docs/Rules/)
+
+### Update your Vera/openLuup status with Shelly I/O actions
+When using Shelly, you can directly call the Vera/openLuup's endpoints to update the variables using Shelly I/O actions. These actions are used to call HTTP endpoints when an event occurs.
+
+Even if very basic compared to Tasmota's scripting features, this is useful to avoid running code on your Vera to just updated the status of your virtual devices.
 
 ### Ping device for status
 If you want to ping a device and have its status associated to the virtual device, you can write a simple scene like this, to be executed every *x* minutes.

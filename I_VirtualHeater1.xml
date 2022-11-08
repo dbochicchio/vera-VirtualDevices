@@ -52,6 +52,7 @@
 				return luup.variable_get("urn:upnp-org:serviceId:TemperatureSetpoint1", "CurrentSetpoint", lul_device)
 			</run>
 		</action>
+
 		<action>
 			<serviceId>urn:upnp-org:serviceId:TemperatureSetpoint1_Heat</serviceId>
 			<name>SetCurrentSetpoint</name>
@@ -68,6 +69,22 @@
 			</run>
 		</action>
 
+				<action>
+			<serviceId>urn:upnp-org:serviceId:TemperatureSetpoint1_Cool</serviceId>
+			<name>SetCurrentSetpoint</name>
+			<run>
+				VirtualHeater1.actionSetCurrentSetpoint(lul_device, lul_settings.NewCurrentSetpoint)
+				return 4,0
+			</run>
+		</action>
+		<action>
+			<serviceId>urn:upnp-org:serviceId:TemperatureSetpoint1_Cool</serviceId>
+			<name>GetCurrentSetpoint</name>
+			<run>
+				return luup.variable_get("urn:upnp-org:serviceId:TemperatureSetpoint1", "CurrentSetpoint", lul_device)
+			</run>
+		</action>
+		
 		<action>
 			<serviceId>urn:upnp-org:serviceId:HVAC_UserOperatingMode1</serviceId>
 			<name>SetModeTarget</name>
