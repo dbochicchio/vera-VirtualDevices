@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------
--- Copyright (c) 2019-2021 Daniele Bochicchio
+-- Copyright (c) 2019-2022 Daniele Bochicchio
 -- License: MIT License
 -- Source Code: https://github.com/dbochicchio/Vera-VirtualDevices
 ------------------------------------------------------------------------
@@ -48,6 +48,7 @@ function actionPower(devNum, state)
 end
 
 function updateSetpointAchieved(devNum)
+	devNum = tonumber(devNum)
 	local tNow = os.time()
 	local modeStatus, lastChanged = lib.getVar(HVACSID, "ModeStatus", "Off", devNum)
 	local temp = lib.getVarNumeric(TEMPSENSORSSID, "CurrentTemperature", 18, devNum)
@@ -143,18 +144,18 @@ function virtualThermostatWatch(devNum, sid, var, oldVal, newVal)
 			if (newVal or "") == "" then newVal = "Off" end -- AltUI+Openluup bug
 		elseif var == "ModeStatus" then
 			-- update switch SID
-			lib.setVar(SWITCHSID, "Status", tostring(newVal or "") ~= "Off" and "1" or "0", devNum)
+			lib.setVarDef(SWITCHSID, "Status", tostring(newVal or "") ~= "Off" and "1" or "0", devNum)
 		end
 	elseif sid == TEMPSETPOINTSID then
 		if (newVal or "") ~= "" and var == "CurrentSetpoint" and hasChanged then
-			lib.setVar(TEMPSETPOINTSID_HEAT, "CurrentSetpoint", newVal, devNum) -- copy and keep it in sync
+			lib.setVarDef(TEMPSETPOINTSID_HEAT, "CurrentSetpoint", newVal, devNum) -- copy and keep it in sync
 		end
 	elseif sid == TEMPSETPOINTSID_HEAT then
 		if (newVal or "") ~= "" and var == "CurrentSetpoint" and hasChanged then
-			updateSetpointAchieved(devNum)
+			luup.call_delay("updateSetpointAchieved", 1, devNum)
 		end
 	elseif sid == TEMPSENSORSSID then
-		updateSetpointAchieved(devNum)
+		luup.call_delay("updateSetpointAchieved", 1, devNum)
 	end
 end
 
@@ -170,7 +171,7 @@ function virtualThermostatWatchSync(devNum, sid, var, oldVal, newVal)
 
 			local thermostatID = lib.getVarNumeric(MYSID, "ThermostatDeviceID", 0, devNum)
 			if thermostatID > 0 then
-				lib.setVar(TEMPSENSORSSID, "CurrentTemperature", newVal, thermostatID)
+				lib.setVarDef(TEMPSENSORSSID, "CurrentTemperature", newVal, thermostatID)
 			end
 		end
 	end
@@ -233,12 +234,14 @@ function startPlugin(devNum)
 		end
 
 		-- MQTT
-		lib.initializeMqtt(devNum, {
-			["PowerStatusOn"] = { Service = HVACSID, Variable = "ModeStatus", Value = "HeatOn" },
-			["PowerStatusOff"] = { Service = HVACSID, Variable = "ModeStatus", Value = "Off" },
-			["TargetTemperature"] = { Service = TEMPSETPOINTSID, Variable = "CurrentSetpoint" },
-			["Temperature"] = { Service = TEMPSENSORSSID, Variable = "CurrentTemperature" }
-			})
+		if lib.openLuup then
+			lib.initializeMqtt(devNum, {
+				["PowerStatusOn"] = { Service = HVACSID, Variable = "ModeStatus", Value = "HeatOn" },
+				["PowerStatusOff"] = { Service = HVACSID, Variable = "ModeStatus", Value = "Off" },
+				["TargetTemperature"] = { Service = TEMPSETPOINTSID, Variable = "CurrentSetpoint" },
+				["Temperature"] = { Service = TEMPSENSORSSID, Variable = "CurrentTemperature" }
+				})
+		end
 
 		-- status
 		lib.setVar(HASID, "Configured", 1, deviceID)

@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------
--- Copyright (c) 2019-2021 Daniele Bochicchio
+-- Copyright (c) 2019-2022 Daniele Bochicchio
 -- License: MIT License
 -- Source Code: https://github.com/dbochicchio/Vera-VirtualDevices
 ------------------------------------------------------------------------
@@ -338,11 +338,13 @@ function startPlugin(devNum)
 		end
 
 		-- MQTT
-		lib.initializeMqtt(devNum, {
-			["PowerStatusOn"] = { Service = SWITCHSID, Variable = "Status", Value = "1" },
-			["PowerStatusOff"] = { Service = SWITCHSID, Variable = "Status", Value = "0" },
-			["BrightnessValue"] = { Service = DIMMERSID, Variable = "LoadLevelStatus" }
-			})
+		if lib.openLuup then
+			lib.initializeMqtt(devNum, {
+				["PowerStatusOn"] = { Service = SWITCHSID, Variable = "Status", Value = "1" },
+				["PowerStatusOff"] = { Service = SWITCHSID, Variable = "Status", Value = "0" },
+				["BrightnessValue"] = { Service = DIMMERSID, Variable = "LoadLevelStatus" }
+				})
+		end
 
 		-- status
 		lib.setVar(HASID, "Configured", 1, deviceID)

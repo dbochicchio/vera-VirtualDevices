@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------
--- Copyright (c) 2019-2021 Daniele Bochicchio
+-- Copyright (c) 2019-2022 Daniele Bochicchio
 -- License: MIT License
 -- Source Code: https://github.com/dbochicchio/Vera-VirtualDevices
 ------------------------------------------------------------------------
@@ -48,8 +48,8 @@ function virtualDoorLockWatchSync(devNum, sid, var, oldVal, newVal)
 			if masterID > 0 then
 				local v = tostring(newVal or "0") == "0" and "1" or "0"
 				lib.D(devNum, "virtualDoorLockWatchSync: #%1 - Master: #%2 - Status: %3", devNum, masterID, v)
-				lib.setVar(LOCKSID, "Status", v, masterID)
-				lib.setVar(SWITCHSID, "Status", v, masterID)
+				lib.setVarDef(LOCKSID, "Status", v, masterID)
+				lib.setVarDef(SWITCHSID, "Status", v, masterID)
 			end
 		end
 	end

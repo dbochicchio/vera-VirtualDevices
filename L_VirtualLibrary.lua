@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------
--- Copyright (c) 2019-2021 Daniele Bochicchio
+-- Copyright (c) 2019-2022 Daniele Bochicchio
 -- License: MIT License
 -- Source Code: https://github.com/dbochicchio/Vera-VirtualDevices
 ------------------------------------------------------------------------
@@ -7,7 +7,7 @@
 module("L_VirtualLibrary", package.seeall)
 
 _PLUGIN_NAME = "VirtualDevices"
-_PLUGIN_VERSION = "3.0-beta4"
+_PLUGIN_VERSION = "3.0-beta5"
 
 DEFAULT_ENDPOINT						= "http://"
 local MYSID								= ""
@@ -107,6 +107,11 @@ function setVar(sid, name, val, devNum)
 		return true, s
 	end
 	return false, s
+end
+
+function setVarDef(sid, name, val, devNum)
+	-- TODO: callback
+	setVar(sid, name, val, devNum)
 end
 
 function split(str, sep)
@@ -380,8 +385,9 @@ function subscribeToMqtt(devNum, opts)
 end
 
 function initializeMqtt(devNum, opts)
-	D(devNum, "initializeMqtt(%1,%2) - openLuup: %3", devNum, opts, openLuup)
 	if not openLuup then return end -- openLuup only
+
+	D(devNum, "initializeMqtt(%1,%2) - openLuup: %3", devNum, opts, openLuup)
 
 	-- [COMMANDS_SETPOWER] = { Service = SWITCHSID, Variable = "Status" },
 	for name, item in next, opts do
