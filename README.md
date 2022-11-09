@@ -303,10 +303,12 @@ If you don't want to execute an action, set the corresponding variable to blank,
 To turn ON, set *SetPowerURL* variable to the corresponding HTTP call.
  - For Tasmota: ```http://mydevice/cm?cmnd=Power+On```
  - For Shelly: ```http://mydevice/relay/0?turn=on```
+ - For Multi-Hub Reactor: ```http://reactor:8111/api/v1/entity/entityID/perform/power_switch.set?state=1```
 
 To turn OFF, set *SetPowerOffURL* variable to the corresponding HTTP call.
  - For Tasmota: ```http://mydevice/cm?cmnd=Power+Off```
  - For Shelly: ```http://mydevice/relay/0?turn=off```
+ - For Multi-Hub Reactor: ```http://reactor:8111/api/v1/entity/entityID/perform/power_switch.set?state=0```
 
 You can also specify only *SetPowerURL*, like this: ```http://mydevice/cm?cmnd=Power+%s```
 The *%s* parameter will be replace with *On*/*Off* (this very same case), based on the required action.
@@ -330,10 +332,11 @@ If omitted (blank value or `http://`), the device will try to change the status 
 #### Dimming (Dimmers, RGB Lights, Window Covers/Roller Shutters/Blinds)
 Set *SetBrigthnessURL* variable to the corresponding HTTP call.
 - For Shelly: ```http://mydevice/light/0?brightness=%s```
+- For Multi-Hub Reactor: ```http://reactor:8111/api/v1/entity/entityID/perform/dimming.set?level=%s``` (set scale to 1 - see below)
 - For a custom device: ```http://mydevice/brigthness?v=%s```
 
 The %s parameter will be replaced with the desired dimming (0/100) value. Set to one of the skipped values if not supported (ie: you want to monitor only the value).
-If you want to use a 0/1 scale, please set *DimmingScale* variable to 1 (default: 100).
+If you want to use a 0/1 scale (ie for Reactor), please set *DimmingScale* variable to 1 (default: 100).
 
 ##### Binary Window Covers/Roller Shutters/Blinds (2.40+)
 If you want to emulate a Window Cover/Roller Shutter/Blind but your device is supporting only ON/OFF commands, simply leave *SetBrightnessURL* to one of the skipped values.
@@ -345,12 +348,14 @@ Then go to the device's variable and set *BlindAsSwitch* to 1. The device will n
 #### Color (RGB Lights)
 Set *SetRGBColorURL* variable to the corresponding HTTP call.
 - For a custom device: ```http://mydevice/setcolor?v=%s```
+- For Multi-Hub Reactor: ```http://reactor:8111/api/v1/entity/entityID/perform/rgb_color.set_rgb?red=%s&green=%s&blue=%s```
 
-The %s parameter will be replace with the RBG color. Leave `http://` or blank if not supported.
+The %s parameter will be replace with the RBG color. If you specificy 3 %s, the colors will be separated. Leave `http://` or blank if not supported.
 
 #### White Temperature (RGB Lights)
 Set *SetWhiteTemperatureURL* variable to the corresponding HTTP call.
- - For a custom device: ```http://mydevice/setwhitemode?v=%s```
+- For a custom device: ```http://mydevice/setwhitemode?v=%s```
+- For Multi-Hub Reactor: ```http://reactor:8111/api/v1/entity/entityID/perform/color_temperature.set?value=%s```
 
 The %s parameter will be replace with temperature (from 2000 to 6500 k). Leave `http://` or blank if not supported.
 

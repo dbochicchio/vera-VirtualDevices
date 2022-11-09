@@ -175,11 +175,11 @@ function initVar(sid, name, dflt, devNum)
 end
 
 function scaleDimming(devNum, bri)
-	local scale = lib.getVarNumeric(MYSID, "DimmingScale", 100, devNum)
+	local scale = getVarNumeric(MYSID, "DimmingScale", 100, devNum)
 
 	-- reactor: 0...1
 	if scale == 1 then
-		return = bri / 100
+		return bri / 100
 	end
 
 	-- normal: 0...100
