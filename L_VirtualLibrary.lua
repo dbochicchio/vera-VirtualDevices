@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------
--- Copyright (c) 2019-2022 Daniele Bochicchio
+-- Copyright (c) 2019-2023 Daniele Bochicchio
 -- License: MIT License
 -- Source Code: https://github.com/dbochicchio/Vera-VirtualDevices
 ------------------------------------------------------------------------
@@ -7,7 +7,7 @@
 module("L_VirtualLibrary", package.seeall)
 
 _PLUGIN_NAME = "VirtualDevices"
-_PLUGIN_VERSION = "3.0-beta7"
+_PLUGIN_VERSION = "3.1"
 
 DEFAULT_ENDPOINT						= "http://"
 local MYSID								= ""
@@ -423,7 +423,7 @@ function initializeMqtt(devNum, opts)
 	-- [COMMANDS_SETPOWER] = { Service = SWITCHSID, Variable = "Status" },
 	for name, item in next, opts do
 		local mqttCommand = initVar(item.Service, "MQTT_" .. name, '', devNum)
-		if mqttCommand ~= nil and mqttCommand ~= "" then
+		if mqttCommand ~= nil and mqttCommand ~= "" and mqttCommand ~= "skip" then
 			local topic, payload = mqttCommand:gsub("^mqtt://", "") :match "^(.-)/=/(.+)"
 			subscribeToMqtt(devNum, {opts = item, deviceID = devNum, topic = topic, payload = payload })
 		end

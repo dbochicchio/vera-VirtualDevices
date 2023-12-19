@@ -5,7 +5,7 @@
 			luup.log("VirtualAlarmPartition starting...")
 		
 			VirtualAlarmPartition1 = require("L_VirtualAlarmPartition1")
-			alarmSensorWatch = VirtualAlarmPartition1.sensorWatch
+			alarmSensorWatch = VirtualAlarmPartition1.alarmSensorWatch
 
 			return VirtualAlarmPartition1.startPlugin(devNum)
 		end

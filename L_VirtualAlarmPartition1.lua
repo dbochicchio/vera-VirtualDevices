@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------
--- Copyright (c) 2019-2022 Daniele Bochicchio
+-- Copyright (c) 2019-2023 Daniele Bochicchio
 -- License: MIT License
 -- Source Code: https://github.com/dbochicchio/Vera-VirtualDevices
 ------------------------------------------------------------------------
@@ -41,9 +41,22 @@ function actionRequestPanicMode(devNum, state)
 	end)
 end
 
+function updateStatus(devNum)
+	local vendorStatus = (lib.getVar(ALARMSID, "VendorStatus", "", devNum)) or ""
+	local lastUser = (lib.getVar(ALARMSID, "LastUser", "", devNum)) or ""
+	local state = (lib.getVar(ALARMSID, "DetailedArmMode", "", devNum)) or ""
+	local simpleState = state ~= "Disarmed" and "Armed" or "Disarmed"
+
+	lib.L(devNum, "updateStatus(%1) - (%2,%3,%4,%5)", devNum, vendorStatus, lastUser, state, simpleState)
+
+	setVerboseDisplay(devNum, 
+						string.format('Status: %s%s', simpleState, simpleState == "Disarmed" and "" or (" (" .. state .. ")")),
+						string.format('%s - %s', vendorStatus, lastUser))
+end
+
 -- Watch callback
-function sensorWatch(devNum, sid, var, oldVal, newVal)
-	lib.D(devNum, "sensorWatch(%1,%2,%3,%4,%5)", devNum, sid, var, oldVal, newVal)
+function alarmSensorWatch(devNum, sid, var, oldVal, newVal)
+	lib.L(devNum, "alarmSensorWatch(%1,%2,%3,%4,%5)", devNum, sid, var, oldVal, newVal)
 
 	if oldVal == newVal then return end
 
@@ -54,17 +67,6 @@ function sensorWatch(devNum, sid, var, oldVal, newVal)
 			updateStatus(devNum)
 		end
 	end
-end
-
-function updateStatus(devNum)
-	local vendorStatus = (lib.getVar(ALARMSID, "VendorStatus", "", devNum)) or ""
-	local lastUser = (lib.getVar(ALARMSID, "LastUser", "", devNum)) or ""
-	local state = (lib.getVar(ALARMSID, "DetailedArmMode", "", devNum)) or ""
-	local simpleState = state ~= "Disarmed" and "Armed" or "Disarmed"
-
-	setVerboseDisplay(devNum, 
-						string.format('Status: %s%s', simpleState, simpleState == "Disarmed" and "" or (" (" .. state .. ")")),
-						string.format('%s - %s', vendorStatus, lastUser))
 end
 
 function startPlugin(devNum)
